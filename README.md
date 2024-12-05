@@ -34,6 +34,11 @@ You need to install the following packages to use some of the pipelines:
     playwright install
     ```
 
+4. mlpfinance:
+
+   ```
+   pip install mpl_finance<=0.10.1 mplfinance<=0.12.10b0
+   ```
 
 ## Quick Start
 The [main.py](main.py) script is the entry point for the generation of the dataset. You can use the following main arguments to control the generation process:
