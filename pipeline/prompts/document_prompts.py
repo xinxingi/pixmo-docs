@@ -46,7 +46,47 @@ Please provide the materials in JSON format without additional text at the begin
 
 
 
-GENERATE_DOCUMENT_QA_PROMPT = """You are an expert in data analysis and good at asking questions about documents.
+GENERATE_DOCUMENT_QA_PROMPT = """You are an expert in document analysis and good at asking questions about documents.
+My persona is: "{persona}"
+I want you to generate some question-answer pairs of a {figure_type} about {topic}, which I would ask.
+Instead of showing the document, I provide the materials and the code that generates the document.
+
+Here is the data:
+{data}
+
+Here is the code that generates the document:
+```
+{code}
+```
+
+Please come up with a list of *reasonable questions* that people will ask when they see the rendered document. Here are the requirements:
+1. **Question Style**: The questions must be natural and related to the document, which can help interpret the data and understand the insights.
+    (1) The questions vary in complexity. Some are easy to answer by just referring to the document, and some are challenging and require multiple-step reasoning.
+    (2) The questions should be answerable based on the *visual information* in the document. Don't include any coding details in the questions since this type of information is not visible in the document.
+
+2. **Question Types**: Most questions are short-answer, but some can be multiple-choice, yes/no, or summary questions. You can use the following types:
+    (1) Short-answer: At least 5 short-answer questions.
+    (2) Multiple-choice: There should be at least two multiple-choice questions. The number of options can be 3, 4, 5, or more. The option labels can be different types: alphabet, Arabic numerals, or Roman numerals. The correct option should be different in each question.
+    (3) Yes/No (True/False): At least 1 binary question.
+    (4) Summary: At least 1 summary question that asks for describing the *entire document* or the *main idea* of the document.
+    (5) Unanswerable: At least 1 question cannot be answered based on the visual information in the document. The answer to this question can be "Cannot be determined", "Not enough information", "I don't know", etc.
+
+3. **Provide Explanations**: In addition to a *concise answer* for each question, provide an explanation that details the reasoning steps to reach the answer. For the summary question, the explanation is a more detailed description of the document.
+
+4. **Response Format**: separate the question, answer, and explanation with a | character: question | answer | explanation. The question-answer pairs should be separated by double newlines (\n\n).
+For example:
+what is the total revenue? | $100,000 | The total revenue is the sum of all revenue sources in the document.
+
+which product has the highest sales? A. Product A B. Product B C. Product C | B | Product A - $10,000, Product B - $15,000, Product C - $5,000. Product B has the highest sales.
+
+... ...
+
+Do not include any additional text at the beginning or end of your response."""
+
+
+
+
+GENERATE_DOCUMENT_QA_SHORT_ANSWER_PROMPT = """You are an expert in data analysis and good at asking questions about documents.
 My persona is: "{persona}"
 I want you to generate some question-answer pairs of a {figure_type} about {topic}, which I would ask.
 Instead of showing the document, I provide the data and the code that generates the document.
@@ -154,3 +194,314 @@ Here are the requirements:
     Put ```python at the beginning and ``` at the end of the script to separate the code from the text.
 
 Please don't answer with any additional text in the script, your whole response should be the Python code which can be directly executed."""
+
+
+
+
+GENERATE_DOCUMENT_POINT_PROMPT = """You are an expert web designer and are good at editing HTML to add points for localization usage.
+Task description: You are given a {figure_type} about {topic} and need to generate pointing data for it.
+You need to first create a point intent, as well as the name for those points, and then modify the HTML code to add the points that can be visualized in the rendered page.
+
+Here is the orginal HTML code:
+<code>
+{code}
+</code>
+
+Here are the requirements:
+1. **Point Intent**: 
+    (1) The point intent is like a question or goal that people will ask about what to point out in this {figure_type}, e.g., "Point to the vegeterian dishes in the menu.", "Show me the total revenue in the table.", etc.
+    (2) I want you to generate one intent for each of the following types:
+        (i) **Simple Single Point**: A simple intent that requires pointing to a single element which can be recognized quickly.
+        (ii) **Complex Single Point**: A complex intent that requires multi-hop reasoning or calculation.
+        (iii) **Multiple Points**: An intent that requires pointing to multiple elements.
+        (iv) **Specific Single Point**: An intent lead to a point that is unique to this type of document.
+        (v) **{intent_type}**
+    Please try your best to adhere to those types and create diverse intents that cover different aspects of the document. You can adjust the intent based on the content of the document.
+    (3) Use the prefix of "{prefix}" to start the point intent. You can also create your own style if you think it's more suitable and natural.
+    (4) Most intents will just point to **one element**, so you just need to change one line of code.
+
+2. **Point Names**: Assign a name for all the points that satisfy the intent. The name should be short and descriptive, e.g., "Vegeterian Dishes", "Total Revenue", etc.
+
+3. **Editing HTML**: I have figured out how to modify the HTML to add points, you just need to follow the instructions below:
+    (1) I have added the styles (`point-container` and `location-point`) for the points in the original HTML code. You just need to use the provided CSS classes to add the points.
+    (2) To add the points, you need to first identify the elements in the HTML that satisfy the intent. Then, apply the CSS classes to these elements to add points over them.
+    (3) Usage: element --> <span class="point-container">element<span class="location-point"></span></span>, remember the element here can be any HTML element, no need to be a entire span, can be a single word.
+    (4) The point should be precise and accurate, pointing to the exact element that satisfies the intent and should not be too coarse grained.
+    (5) You don't need to provide the full HTML code, just the modified lines with the points added (You can have multiple points in one line). **Do not change any other parts of the HTML code**, 
+
+The output format is:
+<intent_1>
+The goal or question about what to point out.
+</intent_1>
+
+<name_1>
+A short name for the points.
+</name_1>
+
+<modified_lines_1>
+The modified lines of the HTML code with the points added. Using the following format:
+original line x --> modified line x
+original line y --> modified line y
+...
+**Make sure the original line exactly matches the line in the HTML code.**
+</modified_lines_1>
+
+<intent_2>
+...
+</intent_2>
+
+<name_2>
+...
+</name_2>
+
+<modified_lines_2>
+...
+</modified_lines_2>
+
+...
+
+Please adhere to the output format and do not include any additional text in your response."""
+
+
+
+
+INTENT_PREFIXES = [
+    "Point to",
+    "Point out",
+    "Provide a point (points) for",
+    "Show me",
+    "Highlight",
+    "Locate",
+    "Generate a point (a list of points) for",
+    "Find the",
+    "Identify",
+    "Mark",
+    "If there is xxx, point to it",
+    "If there is xxx, show me",
+    "Help me find",
+]
+
+
+
+
+# POINT_INTENTS = [
+#     "point to one simple element",
+#     "point to one obvious element",
+#     "point to one element that is easy to point to",
+#     "point to one element that can be recognized quickly",
+#     "point to a specific word",
+#     "point to an element in the corner",
+#     "point to an element on the left",
+#     "point to an element on the right",
+#     "point to an element in the middle",
+#     "point to an element at the top",
+#     "point to an element at the bottom",
+#     "point to one element requiring attention",
+#     "point to one element that requires reasoning",
+#     "point to one element that requires math calculation",
+#     "point to one element that requires comparison",
+#     "point to one element that people may care about",
+#     "point to one element that people will likely ask about",
+#     "point to one element that people will likely ignore",
+#     "point to one element that is interesting",
+#     "point to something that is unique",
+#     "point to one element that is important when reading this document",
+#     "a question that leads to a simple point",
+#     "a question that leads to two points",
+#     "a question that leads to three points",
+#     "a question that leads to four points",
+#     "a question that leads to five points",
+#     "a question that leads to six points",
+#     "a question that leads to seven points",
+#     "a question that leads to eight points",
+#     "a question that leads to nine points",
+#     "a question that leads to ten points",
+#     "a question that leads to more than ten points",
+#     "point to something in the same category",
+#     "point to something based on a specific criteria",
+#     "point to multiple elements",
+#     "point to specific words",
+#     "point to multiple elements in the corner",
+#     "point to multiple elements on the left",
+#     "point to multiple elements on the right",
+#     "point to multiple elements in the middle",
+#     "point to multiple elements at the top",
+#     "point to multiple elements at the bottom",
+#     "point to multiple elements requiring attention",
+#     "point to multiple elements that requires reasoning",
+#     "point to multiple elements that requires math calculation",
+#     "point to multiple elements that requires comparison",
+#     "point to multiple elements that are important when reading this document",
+#     "point to elements that people may care about",
+#     "point to elements that people may overlook",
+#     "point to elements that are interesting",
+#     "point to elements that people will likely ask about",
+#     "point to elements that people will likely ignore",
+#     "point to elements that are easy to miss",
+#     "point to elements that are hard to see",
+#     "point to one item that people may care about",
+#     "point to one item that people may overlook",
+#     "point to one item that are interesting",
+#     "point to one item that people will likely ask about",
+#     "point to one item that people will likely ignore",
+#     "point to one item that are easy to miss",
+#     "point to one item that are hard to see",
+#     "creative point intent",
+#     "a point that is unique to this type of document",
+#     "a point that is specific to this document",
+#     "a challenging point intent",
+#     "a simple point intent",
+#     "a straightforward point intent",
+#     "a complex point intent",
+#     "an element that is easy to point to",
+#     "an element that is directly visible",
+#     "an intent that has long and detailed requirements",
+#     "an intent that has short and simple requirements",
+#     "an intent that requires a lot of thinking",
+#     "point to a button that user will likely click",
+#     "point to a clickable element",
+# ]
+
+POINT_INTENTS = [
+    "point to one simple icon",
+    "point to one obvious icon",
+    "point to one icon that is easy to point to",
+    "point to one icon that can be recognized quickly",
+    "point to a specific word",
+    "point to an icon in the corner",
+    "point to an icon on the left",
+    "point to an icon on the right",
+    "point to an icon in the middle",
+    "point to an icon at the top",
+    "point to an icon at the bottom",
+    "point to one icon requiring attention",
+    "point to one icon that requires reasoning",
+    "point to one icon that requires math calculation",
+    "point to one icon that requires comparison",
+    "point to one icon that people may care about",
+    "point to one icon that people will likely ask about",
+    "point to one icon that people will likely ignore",
+    "point to one icon that is interesting",
+    "point to something that is unique",
+    "point to one icon that is important when reading this document",
+    "a question that leads to a simple point",
+    "a question that leads to two points",
+    "a question that leads to three points",
+    "a question that leads to four points",
+    "a question that leads to five points",
+    "a question that leads to six points",
+    "a question that leads to seven points",
+    "a question that leads to eight points",
+    "a question that leads to nine points",
+    "a question that leads to ten points",
+    "a question that leads to more than ten points",
+    "point to something in the same category",
+    "point to something based on a specific criteria",
+    "point to multiple icons",
+    "point to specific words",
+    "point to multiple icons in the corner",
+    "point to multiple icons on the left",
+    "point to multiple icons on the right",
+    "point to multiple icons in the middle",
+    "point to multiple icons at the top",
+    "point to multiple icons at the bottom",
+    "point to multiple icons requiring attention",
+    "point to multiple icons that requires reasoning",
+    "point to multiple icons that requires math calculation",
+    "point to multiple icons that requires comparison",
+    "point to multiple icons that are important when reading this document",
+    "point to icons that people may care about",
+    "point to icons that people may overlook",
+    "point to icons that are interesting",
+    "point to icons that people will likely ask about",
+    "point to icons that people will likely ignore",
+    "point to icons that are easy to miss",
+    "point to icons that are hard to see",
+    "point to one icon that people may care about",
+    "point to one icon that people may overlook",
+    "point to one icon that are interesting",
+    "point to one icon that people will likely ask about",
+    "point to one icon that people will likely ignore",
+    "point to one icon that are easy to miss",
+    "point to one icon that are hard to see",
+    "creative point intent",
+    "a point that is unique to this type of document",
+    "a point that is specific to this document",
+    "a challenging point intent",
+    "a simple point intent",
+    "a straightforward point intent",
+    "a complex point intent",
+    "an icon that is easy to point to",
+    "an icon that is directly visible",
+    "an intent that has long and detailed requirements",
+    "an intent that has short and simple requirements",
+    "an intent that requires a lot of thinking",
+    "point to a button that user will likely click",
+    "point to a clickable icon",
+]
+
+
+
+GENERATE_SCREEN_POINT_PROMPT = """You are an expert web designer and are good at editing HTML to add points for localization usage.
+Task description: You are given a {figure_type} about {topic} and need to generate pointing data for it. This will micic how user will click on the screen.
+You need to first create a point intent, as well as the name for those points, and then modify the HTML code to add the points that can be visualized in the rendered page.
+
+Here is the orginal HTML code:
+<code>
+{code}
+</code>
+
+Here are the requirements:
+1. **Point Intent**: 
+    (1) The point intent is like a question or goal that people will click on the screenshot of {figure_type}, e.g., "Point to the exit button.", "Show me the point to add this product to cart.", etc.
+    (2) I want you to generate one intent for each of the following types:
+        (i) **Simple Single Point**: A simple intent that requires pointing to a single element/icon which can be recognized quickly.
+        (ii) **Complex Single Point**: A complex intent that requires multi-hop reasoning or calculation.
+        (iii) **Single Clickable Visual Element**: An intent that requires pointing to a single visual element/icon, e.g., a button, a text field, etc.
+        (iv) **Specific Single Point**: An intent lead to a point/icon that is unique to this type of screenshot.
+        (v) **{intent_type}**
+    Please try your best to adhere to those types and create diverse intents that cover different aspects of the screenshot. You can adjust the intent based on the content of the screenshot.
+    (3) Use the prefix of "{prefix}" to start the point intent. You can also create your own style if you think it's more suitable and natural.
+    (4) Most intents will just point to **one element**, so you just need to change one line of code.
+
+2. **Point Names**: Assign a name for all the points that satisfy the intent. The name should be short and descriptive, e.g., "Exit Button", "Add to Cart", etc.
+
+3. **Editing HTML**: I have figured out how to modify the HTML to add points, you just need to follow the instructions below:
+    (1) I have added the styles (`point-container` and `location-point`) for the points in the original HTML code. You just need to use the provided CSS classes to add the points.
+    (2) To add the points, you need to first identify the elements in the HTML that satisfy the intent. Then, apply the CSS classes to these elements to add points over them.
+    (3) Usage: element --> <span class="point-container">element<span class="location-point"></span></span>, remember the element here can be any HTML element, no need to be a entire span, can be a single word.
+    (4) The point should be precise and accurate, pointing to the exact element that satisfies the intent and should not be too coarse grained.
+    (5) You don't need to provide the full HTML code, just the modified lines with the points added (You can have multiple points in one line). **Do not change any other parts of the HTML code**, 
+
+The output format is:
+<intent_1>
+The goal or question about what to point out.
+</intent_1>
+
+<name_1>
+A short name for the points.
+</name_1>
+
+<modified_lines_1>
+The modified lines of the HTML code with the points added. Using the following format:
+original line x --> modified line x
+original line y --> modified line y
+...
+**Make sure the original line exactly matches the line in the HTML code.**
+</modified_lines_1>
+
+<intent_2>
+...
+</intent_2>
+
+<name_2>
+...
+</name_2>
+
+<modified_lines_2>
+...
+</modified_lines_2>
+
+...
+
+Please adhere to the output format and do not include any additional text in your response."""

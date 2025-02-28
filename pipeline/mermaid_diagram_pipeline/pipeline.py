@@ -1,4 +1,3 @@
-import os
 from datasets.fingerprint import Hasher
 from datadreamer.steps import SuperStep
 from .generate_diagram_topics import GenerateDiagramTopics
@@ -28,7 +27,7 @@ class MermaidDiagramPipeline(SuperStep):
         self.register_output("code")
         self.register_output("image")
 
-        if os.environ["GENERATE_QA"] == "true": self.register_output("qa")
+        if self.args["qa"]: self.register_output("qa")
 
     def run(self):
         # Generate Topics

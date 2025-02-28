@@ -1,6 +1,6 @@
 # pixmo-docs
 
-This is the repository for the generation system of the [Pixmo-docs](https://huggingface.co/datasets/allenai/pixmo-docs) dataset, which support the generation of synthetic charts, tables, diagrams and more.
+This is the repository for the generation system of the [PixMo-Docs](https://huggingface.co/datasets/allenai/pixmo-docs), [CoSyn-400K](https://huggingface.co/datasets/allenai/CoSyn-400K), and [CoSyn-point](https://huggingface.co/datasets/allenai/CoSyn-point) datasets. PixMo-Docs was used to train the [Molmo](https://arxiv.org/abs/2409.17146) model, and the CoSyn datasets are an expanded version that use an improved pipeline and more types of documents.
 
 ## Installation
 After cloning the repo, you can install the required dependencies using the following commands:
@@ -34,10 +34,16 @@ You need to install the following packages to use some of the pipelines:
     playwright install
     ```
 
-4. mlpfinance:
+4. mplfinance:
 
    ```
    pip install mpl_finance<=0.10.1 mplfinance<=0.12.10b0
+   ```
+
+5. cairosvg:
+
+   ```
+   pip install cairosvg<=2.7.1
    ```
 
 ## Quick Start
@@ -57,32 +63,64 @@ You can use comma separated values for the `-p` and `-t` arguments to generate m
 Please refer to the [main.py](main.py) script for more details on the available arguments and their usage.
 
 
-## Pipelines
-We released 13 pipelines to generate four main categories of text-rich images: charts, diagrams, tables, and documents. Each pipeline uses one renderer/programming language to generate the images.
-* **Chart**:
-    * *MatplotlibChartPipeline*: using [Matplotlib](https://matplotlib.org/) to generate charts like bar charts, line charts, etc. You can check the [Matplotlib gallery](https://matplotlib.org/stable/gallery/index.html) for possible charts.
-    * *PlotlyChartPipeline*: using [Plotly](https://plotly.com/python/) to generate charts. You can check the [Plotly gallery](https://plotly.com/python/) for possible charts.
-    * *VegaLiteChartPipeline*: using [Vega-Lite](https://vega.github.io/vega-lite/) to generate charts. You can check the [Vega-Lite gallery](https://vega.github.io/vega-lite/examples/) for possible usage.
-    * *LaTeXChartPipeline*: using TikZ to generate charts. This pipeline only works for simple charts like bar charts, line charts, etc.
-    * *HTMLChartPipeline*: using HTML and CSS to generate charts. This pipeline only works for simple charts like bar charts, line charts, etc.
+## Pipelines  
+We released 25 pipelines to generate eight main categories of text-rich images: charts, tables, documents, diagrams, circuits, specialized graphics, and pointing. Each pipeline uses one renderer/programming language to generate the images.  
 
-* **Diagram**:
-    * *GraphvizDiagramPipeline*: using [Graphviz](https://graphviz.org/) to generate diagrams like directed graphs, trees, etc.
-    * *MermaidDiagramPipeline*: using [Mermaid](https://mermaid-js.github.io/mermaid/#/) to generate diagrams like flowcharts, sequence diagrams, etc.
-    * *LaTeXDiagramPipeline*: using TikZ to generate diagrams, you can refer to [here](https://texample.net/tikz/examples/tag/diagrams/) for possible diagrams.
-  
-* **Table**:
-    * *LaTeXTablePipeline*: this works the best for tables with complex structures.
-    * *HTMLTablePipeline*: only works for simple tables like single header tables.
-    * *PlotlyTablePipeline*: only works for simple tables like single header tables.
-  
-* **Document**:
-    * *LaTeXDocumentPipeline*: works for diverse types of documents like reports, articles, etc.
-    * *HTMLDocumentPipeline*: can create documents with complex styles and structures.
+* **Chart**:  
+    * *MatplotlibChartPipeline*: using [Matplotlib](https://matplotlib.org/) to generate charts like bar charts, line charts, etc. You can check the [Matplotlib gallery](https://matplotlib.org/stable/gallery/index.html) for possible charts.  
+    * *PlotlyChartPipeline*: using [Plotly](https://plotly.com/python/) to generate charts. You can check the [Plotly gallery](https://plotly.com/python/) for possible charts.  
+    * *VegaLiteChartPipeline*: using [Vega-Lite](https://vega.github.io/vega-lite/) to generate charts. You can check the [Vega-Lite gallery](https://vega.github.io/vega-lite/examples/) for possible usage.  
+    * *LaTeXChartPipeline*: using TikZ to generate charts. This pipeline only works for simple charts like bar charts, line charts, etc.  
+    * *HTMLChartPipeline*: using HTML and CSS to generate charts. This pipeline only works for simple charts like bar charts, line charts, etc.  
+
+* **Table**:  
+    * *LaTeXTablePipeline*: best for tables with complex structures.  
+    * *MatplotlibTablePipeline*: uses Matplotlib to render tables within figures.  
+    * *PlotlyTablePipeline*: only works for simple tables like single-header tables.  
+    * *HTMLTablePipeline*: only works for simple tables like single-header tables.  
+
+* **Document**:  
+    * *LaTeXDocumentPipeline*: works for diverse types of documents like reports, articles, etc.  
+    * *HTMLDocumentPipeline*: can create documents with complex styles and structures.  
+    * *DOCXDocumentPipeline*: generates Microsoft Word-compatible `.docx` documents.  
+
+* **Diagram**:  
+    * *GraphvizDiagramPipeline*: using [Graphviz](https://graphviz.org/) to generate diagrams like directed graphs, trees, etc.  
+    * *MermaidDiagramPipeline*: using [Mermaid](https://mermaid-js.github.io/mermaid/#/) to generate diagrams like flowcharts, sequence diagrams, etc.  
+    * *LaTeXDiagramPipeline*: using TikZ to generate diagrams. You can refer to [this](https://texample.net/tikz/examples/tag/diagrams/) for possible diagrams.  
+
+* **Circuit**:  
+    * *SchemDrawCircuitPipeline*: uses [SchemDraw](https://schemdraw.readthedocs.io/) to generate electrical circuit diagrams.  
+    * *LaTeXCircuitPipeline*: uses TikZ circuit libraries to generate circuit diagrams.  
+
+* **Specialized Graphics**:  
+    * *DALLEImagePipeline*: generates images using DALL·E models.  
+    * *RdkitChemicalPipeline*: renders chemical structure diagrams using [RDKit](https://www.rdkit.org/).  
+    * *LaTeXMathPipeline*: generates mathematical expressions using LaTeX.  
+    * *LilyPondMusicPipeline*: generates sheet music using [LilyPond](http://lilypond.org/).  
+    * *SVGGraphicPipeline*: creates vector graphics using SVG format.  
+    * *AsymptoteGraphicPipeline*: uses [Asymptote](https://asymptote.sourceforge.io/) to generate mathematical and technical graphics.  
+
+* **Web Screens**:
+    * *HTMLScreenPipeline*: creates HTML-based screen layouts rendered with [Playwright](https://playwright.dev/) and Google Chrome / Chromium.  
+
+* **Pointing**:  
+    * *HTMLDocumentPointPipeline*: generates HTML documents with structured points.  
+
+
 
 
 ## Citation
-Please cite the following paper if you use this code in your work.
+Please cite the following papers if you use this code in your work.
+
+```bibtex
+@article{yang2025scaling,
+      title={Scaling Text-Rich Image Understanding via Code-Guided Synthetic Multimodal Data Generation},
+      author={Yang, Yue and Patel, Ajay and Deitke, Matt and Gupta, Tanmay and Weihs, Luca and Head, Andrew and Yatskar, Mark and Callison-Burch, Chris and Krishna, Ranjay and Kembhavi, Aniruddha and others},
+      journal={arXiv preprint arXiv:2502.14846},
+      year={2025}
+}
+```
 
 ```bibtex
 @article{deitke2024molmo,

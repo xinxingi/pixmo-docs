@@ -33,6 +33,48 @@ Please provide the elements in JSON format without additional text at the beginn
 
 GENERATE_DIAGRAM_QA_PROMPT = """You are an expert in data analysis and good at asking questions about diagrams.
 My persona is: "{persona}"
+I want you to generate some question-answer pairs of a {figure_type} about {topic}, which I would ask.
+Instead of showing the figure, I provide the data and the code that generates the figure.
+
+Here is the data:
+<data>
+{data}
+</data>
+
+Here is the code that generates the figure:
+<code>
+{code}
+</code>
+
+Please come up with a list of *reasonable questions* that people will ask when they see the rendered figure. Here are the requirements:
+1. **Question Style**: The questions must be natural and related to the figure, which can help interpret the data and understand the insights.
+    (1) The questions vary in complexity. Some are easy to answer by just referring to the figure, and some are challenging and require multiple-step reasoning.
+    (2) The questions should be answerable based on the *visual information* in the figure. Don't include any coding details in the questions since this type of information is not visible in the figure.
+
+2. **Question Types**: Most questions are short-answer, but some can be multiple-choice, yes/no, or summary questions. You can use the following types:
+    (1) Short-answer: At least 5 short-answer questions.
+    (2) Multiple-choice: There should be at least two multiple-choice questions. The number of options can be 3, 4, 5, or more. The option labels can be different types: alphabet, Arabic numerals, or Roman numerals. The correct option should be different in each question.
+    (3) Yes/No (True/False): At least 1 binary question.
+    (4) Summary: At least 1 summary question that asks for describing the *entire figure* or writing a caption for the figure.
+    (5) Unanswerable: At least 1 question cannot be answered based on the visual information in the figure. The answer to this question can be "Cannot be determined", "Not enough information", "I don't know", etc.
+
+3. **Provide Explanations**: In addition to a *concise answer* for each question, provide an explanation that details the reasoning steps to reach the answer. For the summary question, the explanation is a more detailed description of the figure.
+
+4. **Response Format**: separate the question, answer, and explanation with a | character: question | answer | explanation. The question-answer pairs should be separated by double newlines (\n\n).
+For example:
+what's the difference between A and B? | 15 | A is 10 and B is 25, so the difference is 25-10=15
+
+Which group has the highest value? A. Group-1 B. Group-2 C. Group-3 | B | Group-1 is 20, Group-2 is 25, and Group-3 is 15, so Group-2 has the highest value.
+
+... ...
+
+Do not include any additional text at the beginning or end of your response."""
+
+
+
+
+GENERATE_DIAGRAM_QA_SHORT_ANSWER_PROMPT = """You are an expert in data analysis and good at asking questions about diagrams.
+My persona is: "{persona}"
 I want you to generate some question-answer pairs of a "{figure_type}" about "{topic}", which I would ask.
 Instead of showing the diagram, I provide the data and the code that generates the diagram.
 
@@ -146,3 +188,46 @@ Here are the requirements:
     Put ```mermaid at the beginning and ``` at the end of the script to separate the code from the text. This will help me easily extract the code.
 
 Please don't answer with any additional text in the script. Your whole response should be the Mermaid code, which can be directly executed."""
+
+
+
+DIAGRAM_QUESTION_TYPES = [
+    "Basic: Ask for basic visual elements in the figure such as title, axis, ticks, colors, number of data points, etc.",
+    "Visual: Ask about the visual attributes such as color, height, and length of graphical marks (e.g., bars) in the chart.",
+    "Compositional: contains two mathematical/logical operations like sum, diference, average, median, etc.",
+    "Compositional: contains three mathematical/logical operations like sum, diference, average, median, etc.",
+    "Compositional: contains four mathematical/logical operations like sum, diference, average, median, etc.",
+    "Compositional: contains five or more mathematical/logical operations like sum, diference, average, median, etc.",
+    "Comparison: Ask about the relationship between two or more data points.",
+    "Comparison: Ask about the relationship between three or more groups.",
+    "Comparison: Ask about the relationship between four or more groups.",
+    "Comparison: Ask about the relationship among all groups.",
+    "Comparison: compare the data points under specific conditions.",
+    "Data Retrieval: Ask for specific data points or values in the figure.",
+    "Data Retrieval: Ask for some extreme (highest/lowest) data points or values in the figure.",
+    "Data Retrieval: Ask for some non-extreme (somewhere in the middle) data points or values in the figure.",
+    "Data Retrieval: Ask for the data points or values that meet specific conditions.",
+    "Data Retrieval: Ask for the critical points (e.g., turning points, intersection, changing trend, etc) in the figure.",
+    "Reasoning: Ask for a question requiring multi steps of reasoning to answer.",
+    "Reasoning: Ask for a question requiring two steps of reasoning to answer.",
+    "Reasoning: Ask for a question requiring three steps of reasoning to answer.",
+    "Reasoning: Ask for a question requiring four steps of reasoning to answer.",
+    "Reasoning: Ask for a question requiring five steps of reasoning to answer.",
+    "Structure: Ask about the structure of the data or the figure.",
+    "Counting: count the number of data points or groups or elements in the figure.",
+    "Counting: count the number of data points under specific conditions.",
+    "Trend: Ask about the trend or pattern in the figure.",
+    "Layout: Ask about the layout or arrangement of the elements (e.g., subplots) in the figure.",
+    "Visual Reasoning: parsing the visual information in the figure, such as line intersection, comparison of areas/hights, etc.",
+    "Fact Checking: given a statement, ask if it is true or false based on the figure.",
+    "Yes/No: Ask a binary question that can be answered with yes or no.",
+    "Yes/No: Ask a binary question that can be answered with yes or no with multi-step reasoning.",
+    "Multiple Choice: Ask a multiple-choice question with hard negative options.",
+    "Multiple Choice: Ask a multiple-choice question with 3-8 options.",
+    "Multiple Choice: Ask a multiple-choice question with 4 options.",
+    "Multiple Choice: Ask a multiple-choice question with more than 4 options.",
+    "Long question: the question is long with detailed context and requires reasoning to answer.",
+    "Short question: the question is short and can be answered directly by taking a glance at the figure.",
+    "Annotations: Ask about annotations in the figure, such as text notes, highlights, or arrows pointing to specific parts.",
+    "Interaction: Ask about interactions between different variables in the chart.",
+]

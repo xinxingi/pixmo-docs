@@ -47,6 +47,14 @@ class CustomAnthropic(Anthropic):
             stop=stop_any(lambda _: not self.retry_on_fail),  # type: ignore[arg-type]
             reraise=True,
         )
+        # @retry(
+        #     retry=retry_if_exception_type(APIError),
+        #     wait=wait_exponential(multiplier=1, min=3, max=300),
+        #     before_sleep=before_sleep_log(tenacity_logger, logging.INFO),
+        #     after=after_log(tenacity_logger, logging.INFO),
+        #     stop=stop_any(lambda _: not self.retry_on_fail),  # type: ignore[arg-type]
+        #     reraise=True,
+        # )
         def _retry_wrapper(func, **kwargs):
             return func(**kwargs)
 

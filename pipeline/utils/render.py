@@ -7,6 +7,8 @@ from io import BytesIO
 from shutil import rmtree
 from PIL import ImageOps, Image
 import vl_convert as vlc
+from rdkit import Chem
+from rdkit.Chem import AllChem, Draw
 from pdf2image import convert_from_bytes
 from playwright.sync_api import sync_playwright
 
@@ -91,11 +93,52 @@ def render_html(html, full_page=True, random_width=True):
         width = extract_html_width(html)
         if width is None: width = 1200
         else:
-            if random_width: 
-                width += random.randint(50, 150)  # Add some buffer to the width
+            # if random_width is an integer, add a random value to the width
+            if isinstance(random_width, int):
+                width += random_width
             else:
-                width += 100  # Add a fixed buffer to the width
+                if random_width: 
+                    width += random.randint(50, 150)  # Add some buffer to the width
+                else:
+                    width += 100  # Add a fixed buffer to the width
 
+        # Set the resolution of the browser
+        page = browser.new_page(viewport={"width": width, "height": height})
+        
+        page.set_content(html)
+        page.wait_for_timeout(2000)  # wait for the content to render
+
+        # Take a screenshot of the full page
+        screenshot_bytes = page.screenshot(full_page=full_page)
+        browser.close()
+
+    image = Image.open(BytesIO(screenshot_bytes))
+    return image
+
+def extract_screen_width(html):
+    pattern = r'width:\s*(\d+)px'
+    match = re.search(pattern, html)
+
+    if match: return int(match.group(1))
+    else: return None
+
+def render_screen(html, full_page=True, random_width=True):
+    html = html.replace("initial-scale=1.0", "initial-scale=2.0")
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        
+        height = 800
+        # Extract the width of the HTML content
+        width = extract_screen_width(html)
+        if width is None: width = 800
+        else:
+            # if random_width is an integer, add a random value to the width
+            if isinstance(random_width, int):
+                width += random_width
+            else:
+                if random_width: 
+                    width += random.randint(0, 100)
+        
         # Set the resolution of the browser
         page = browser.new_page(viewport={"width": width, "height": height})
         
@@ -189,6 +232,174 @@ def render_mermaid(mermaid_code):
     # Clean up the temporary files
     os.remove(output_mmd)
     os.remove(output_image)
+    os.rmdir(temp_dir)
+
+    # Load the image from the data
+    img = Image.open(BytesIO(image_data))
+
+    return img
+
+
+def render_chemical(smiles, dpi=300):
+    # Create a molecule object from SMILES
+    mol = Chem.MolFromSmiles(smiles)
+    
+    if mol is None: return None
+
+    # Add 2D coordinates to the molecule
+    AllChem.Compute2DCoords(mol)
+
+    # Set a base size based on the length of the molecule
+    base_size_inches = 1 + (mol.GetNumAtoms() * 0.1)
+    
+    # Calculate pixel dimensions based on DPI
+    img_size_pixels = int(base_size_inches * dpi)
+    
+    # Create a drawing object with Cairo
+    drawer = Draw.MolDraw2DCairo(img_size_pixels, img_size_pixels)
+
+    # Customize drawing options randomly
+    opts = drawer.drawOptions()
+    
+    opts.addAtomIndices = random.choice([True, False])
+    opts.addStereoAnnotation = random.choice([True, False])
+    opts.atomLabelFontSize = int(14 * (img_size_pixels / 300))  # Scale font size with DPI
+    opts.bondLineWidth = random.uniform(1.0, 2.0) * (img_size_pixels / 300)  # Scale line width with DPI
+    opts.dblBondOffset = random.uniform(0.1, 0.4)
+    opts.colorBonds = random.choice([True, False])
+    
+    # Random background color
+    opts.backgroundColour = (random.random(), random.random(), random.random())
+
+    # Randomly highlight atoms and bonds
+
+    if random.random() < 0.5:
+        num_atoms = mol.GetNumAtoms()
+        num_bonds = mol.GetNumBonds()
+        
+        highlight_atoms = random.sample(range(num_atoms), k=random.randint(0, num_atoms))
+        highlight_bonds = random.sample(range(num_bonds), k=random.randint(0, num_bonds))
+
+        # Generate random colors for highlighted atoms
+        highlight_atom_colors = {i: (random.random(), random.random(), random.random()) 
+                                for i in highlight_atoms}
+
+    # Draw the molecule
+    drawer.DrawMolecule(mol)
+
+    # Finalize the drawing
+    drawer.FinishDrawing()
+
+    # Get the PNG data
+    png_data = drawer.GetDrawingText()
+
+    # Open the PNG data with Pillow
+    img = Image.open(BytesIO(png_data))
+
+    return crop_whitespace(img)
+
+
+def render_music(lilypound_code):
+    # make the temp directory under the current working directory TODO: Change this to a more permanent location
+    temp_dir = "/Users/yueyang1/Documents/github/Sci-Fi-dev/pipeline/lilypond_music_pipeline/temp"
+
+    # make sure the temp directory exists and is empty
+    os.makedirs(temp_dir, exist_ok=True)
+
+    # Clean up the intermediate files in the temp directory
+    for file in os.listdir(temp_dir):
+        file_path = os.path.join(temp_dir, file)
+        os.remove(file_path)
+
+    # Write LilyPond code to a file
+    lilypond_file = os.path.join(temp_dir, "music.ly")
+    with open(lilypond_file, "w") as f:
+        f.write(lilypound_code)
+
+    # Compile LilyPond code to create PNG
+    try:
+        subprocess.run(
+            ["lilypond", "--png", "-dno-point-and-click", "-o", "music", lilypond_file],
+            check=True,
+            cwd=temp_dir,
+        )
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Error encountered during LilyPond rendering: {e}")
+    
+    # Read the generated PNG image
+    png_file = os.path.join(temp_dir, "music.png")
+    with open(png_file, "rb") as f:
+        image_data = f.read()
+
+    # Clean up the intermediate files in the temp directory
+    for file in os.listdir(temp_dir):
+        file_path = os.path.join(temp_dir, file)
+        os.remove(file_path)
+    
+    # Load the image from the data
+    img = Image.open(BytesIO(image_data))
+
+    return crop_background(img)
+
+
+def render_circuit(circuit):
+    # circuit is a schemdraw.Drawing object
+    temp_dir = tempfile.mkdtemp()
+    output_image = os.path.join(temp_dir, "circuit.png")
+
+    # randomly get a dpi value ranging from 100 to 300
+    circuit.save(output_image, dpi=random.randint(100, 300))
+
+    # Read the generated image
+    with open(output_image, "rb") as file:
+        image_data = file.read()
+
+    # Clean up the temporary files
+    os.remove(output_image)
+    os.rmdir(temp_dir)
+
+    # Load the image from the data
+    img = Image.open(BytesIO(image_data))
+
+    return img
+
+
+def render_svg(svg_string):
+    # Convert SVG string to PNG image with enough resolution for OCR
+    import cairosvg
+    png_data = cairosvg.svg2png(bytestring=svg_string.encode("utf-8"), dpi=random.randint(150, 300))
+    img_buffer = BytesIO(png_data)
+    return Image.open(img_buffer)
+
+
+def render_asymptote(asymptote_code):
+    temp_dir = tempfile.mkdtemp()
+    output_asy = os.path.join(temp_dir, "diagram.asy")
+    output_image = os.path.join(temp_dir, "diagram")
+
+    # Save the Asymptote code to a temporary file
+    with open(output_asy, "w") as file:
+        file.write(asymptote_code)
+
+    # Call the Asymptote CLI to generate the diagram TODO: CHANGE RESOLUTION
+    resolution = random.randint(3, 6)
+    subprocess.run([
+        "asy",
+        "-f", "png",
+        "-render", str(resolution),
+        "-o", output_image,
+        output_asy
+    ])
+
+    # Read the generated image
+    with open(output_image + ".png", "rb") as file:
+        image_data = file.read()
+
+    # Clean up the intermediate files in the temp directory
+    for file in os.listdir(temp_dir):
+        file_path = os.path.join(temp_dir, file)
+        os.remove(file_path)
+
     os.rmdir(temp_dir)
 
     # Load the image from the data
