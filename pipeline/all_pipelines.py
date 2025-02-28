@@ -69,7 +69,7 @@ def run_datadreamer_session(args):
         elif args.llm == "gpt-4o-mini": llm = gpt_4o_mini
 
         if args.code_llm == "gpt-4o": code_llm = gpt_4o
-        elif args.code_llm == "claude-3-7-sonnet-20250219": code_llm = claude_sonnet
+        elif args.code_llm == "claude-sonnet": code_llm = claude_sonnet
         elif args.code_llm == "gpt-4o-mini": code_llm = gpt_4o_mini
 
         # Choose which pipelines to run

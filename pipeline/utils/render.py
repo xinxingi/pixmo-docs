@@ -364,9 +364,9 @@ def render_circuit(circuit):
     return img
 
 
-import cairosvg
 def render_svg(svg_string):
     # Convert SVG string to PNG image with enough resolution for OCR
+    import cairosvg
     png_data = cairosvg.svg2png(bytestring=svg_string.encode("utf-8"), dpi=random.randint(150, 300))
     img_buffer = BytesIO(png_data)
     return Image.open(img_buffer)

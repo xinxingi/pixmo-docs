@@ -40,6 +40,12 @@ You need to install the following packages to use some of the pipelines:
    pip install mpl_finance<=0.10.1 mplfinance<=0.12.10b0
    ```
 
+5. cairosvg:
+
+   ```
+   pip install cairosvg<=2.7.1
+   ```
+
 ## Quick Start
 The [main.py](main.py) script is the entry point for the generation of the dataset. You can use the following main arguments to control the generation process:
 
@@ -96,7 +102,7 @@ We released 25 pipelines to generate eight main categories of text-rich images: 
     * *AsymptoteGraphicPipeline*: uses [Asymptote](https://asymptote.sourceforge.io/) to generate mathematical and technical graphics.  
 
 * **Web Screens**:
-    * *HTMLScreenPipeline*: creates HTML-based screen layouts.  
+    * *HTMLScreenPipeline*: creates HTML-based screen layouts rendered with [Playwright](https://playwright.dev/) and Google Chrome / Chromium.  
 
 * **Pointing**:  
     * *HTMLDocumentPointPipeline*: generates HTML documents with structured points.  
