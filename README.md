@@ -114,14 +114,11 @@ We released 25 pipelines to generate eight main categories of text-rich images: 
 Please cite the following papers if you use this code in your work.
 
 ```bibtex
-@misc{yang2025scalingtextrichimageunderstanding,
-      title={Scaling Text-Rich Image Understanding via Code-Guided Synthetic Multimodal Data Generation}, 
-      author={Yue Yang and Ajay Patel and Matt Deitke and Tanmay Gupta and Luca Weihs and Andrew Head and Mark Yatskar and Chris Callison-Burch and Ranjay Krishna and Aniruddha Kembhavi and Christopher Clark},
-      year={2025},
-      eprint={2502.14846},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2502.14846}, 
+@article{yang2025scaling,
+      title={Scaling Text-Rich Image Understanding via Code-Guided Synthetic Multimodal Data Generation},
+      author={Yang, Yue and Patel, Ajay and Deitke, Matt and Gupta, Tanmay and Weihs, Luca and Head, Andrew and Yatskar, Mark and Callison-Burch, Chris and Krishna, Ranjay and Kembhavi, Aniruddha and others},
+      journal={arXiv preprint arXiv:2502.14846},
+      year={2025}
 }
 ```
 
