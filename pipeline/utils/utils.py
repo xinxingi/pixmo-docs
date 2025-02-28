@@ -8,6 +8,7 @@ from PIL import Image, ImageColor, ImageDraw
 from io import StringIO
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from threadpoolctl import threadpool_limits
 
 def contains_chinese(text):
     # Check if the text contains any Chinese characters
@@ -63,9 +64,47 @@ def extract_code(input_string):
             return None
 
 
+def extract_schemdraw_code(input_string):
+    # extract code from the input string
+    code_match = re.search(r"```python(.*)```", input_string, re.DOTALL)
+    if code_match:
+        extracted_code = code_match.group(1).strip()
+        #remove the .draw() function
+        lines = extracted_code.split("\n")
+        new_lines = [line for line in lines if ".draw(" not in line]
+        return "\n".join(new_lines)
+    else:
+        code_match = re.search(r"```(.*)```", input_string, re.DOTALL)
+        if code_match:
+            extracted_code = code_match.group(1).strip()
+            #remove the .draw() function
+            lines = extracted_code.split("\n")
+            new_lines = [line for line in lines if ".draw(" not in line]
+            return "\n".join(new_lines)
+        else:
+            print("No valid code found")
+            return None
+
+
 def extract_latex(input_string):
     # extract code from the input string
     code_match = re.search(r"```latex(.*)```", input_string, re.DOTALL)
+    if code_match:
+        extracted_code = code_match.group(1).strip()
+        return extracted_code
+    else:
+        code_match = re.search(r"```(.*)```", input_string, re.DOTALL)
+        if code_match:
+            extracted_code = code_match.group(1).strip()
+            return extracted_code
+        else:
+            print("No valid code found")
+            return None
+
+
+def extract_svg(input_string):
+    # extract code from the input string
+    code_match = re.search(r"```svg(.*)```", input_string, re.DOTALL)
     if code_match:
         extracted_code = code_match.group(1).strip()
         return extracted_code
@@ -174,6 +213,157 @@ def extract_csv(input_string):
     return "\n".join([",".join(row) for row in csv])
 
 
+def extract_SMILES(input_string):
+    # extract SMILES from the input string
+    code_match = re.search(r"```SMILES(.*)```", input_string, re.DOTALL)
+    if code_match:
+        extracted_code = code_match.group(1).strip()
+        return extracted_code
+    else:
+        code_match = re.search(r"```(.*)```", input_string, re.DOTALL)
+        if code_match:
+            extracted_code = code_match.group(1).strip()
+            return extracted_code
+        else:
+            print("No valid code found")
+            return None
+
+
+from rdkit import Chem
+def is_SMILE_valid(smiles):
+    """
+    Check if the given SMILES representation is valid.
+    
+    Parameters:
+    smiles (str): A string representing the SMILES structure.
+    
+    Returns:
+    bool: True if the SMILES is valid, False otherwise.
+    """
+    try:
+        mol = Chem.MolFromSmiles(smiles)
+        return mol is not None
+    except:
+        return False
+
+
+def extract_math(input_string):
+    math_example = {}
+    # <question> </question> is the math question
+    question_match = re.search(r"<question>(.*)</question>", input_string, re.DOTALL)
+    if question_match: math_example["question"] = question_match.group(1).strip()
+
+    # <explanation> </explanation> is the explanation
+    explanation_match = re.search(r"<explanation>(.*)</explanation>", input_string, re.DOTALL)
+    if explanation_match: math_example["explanation"] = explanation_match.group(1).strip()
+
+    # <answer> </answer> is the answer
+    answer_match = re.search(r"<answer>(.*)</answer>", input_string, re.DOTALL)
+    if answer_match: math_example["answer"] = answer_match.group(1).strip()
+
+    return math_example
+
+
+def extract_math_asymptote(input_string):
+    math_example = {}
+    # <asymptote> </asymptote> is the graph
+    graph_match = re.search(r"<asymptote>(.*)</asymptote>", input_string, re.DOTALL)
+    if graph_match: math_example["graph"] = graph_match.group(1).strip()
+
+    # <question> </question> is the math question
+    question_match = re.search(r"<question>(.*)</question>", input_string, re.DOTALL)
+    if question_match: math_example["question"] = question_match.group(1).strip()
+
+    # <explanation> </explanation> is the explanation
+    explanation_match = re.search(r"<explanation>(.*)</explanation>", input_string, re.DOTALL)
+    if explanation_match: math_example["explanation"] = explanation_match.group(1).strip()
+
+    # <answer> </answer> is the answer
+    answer_match = re.search(r"<answer>(.*)</answer>", input_string, re.DOTALL)
+    if answer_match: math_example["answer"] = answer_match.group(1).strip()
+
+    return math_example
+
+
+def extract_math_svg(input_string):
+    math_example = {}
+    # <graph> </graph> is the graph
+    graph_match = re.search(r"<graph>(.*)</graph>", input_string, re.DOTALL)
+    if graph_match: math_example["graph"] = graph_match.group(1).strip()
+
+    # <question> </question> is the math question
+    question_match = re.search(r"<question>(.*)</question>", input_string, re.DOTALL)
+    if question_match: math_example["question"] = question_match.group(1).strip()
+
+    # <explanation> </explanation> is the explanation
+    explanation_match = re.search(r"<explanation>(.*)</explanation>", input_string, re.DOTALL)
+    if explanation_match: math_example["explanation"] = explanation_match.group(1).strip()
+
+    # <answer> </answer> is the answer
+    answer_match = re.search(r"<answer>(.*)</answer>", input_string, re.DOTALL)
+    if answer_match: math_example["answer"] = answer_match.group(1).strip()
+
+    return math_example
+
+
+def is_math_valid(math_example):
+    return all(key in math_example for key in ["question", "explanation", "answer"])
+
+
+def is_math_graphic_valid(math_example):
+    return all(key in math_example for key in ["graph", "question", "explanation", "answer"])
+
+
+def extract_lilypond(input_string):
+    # extract code from the input string
+    code_match = re.search(r"```lilypond(.*)```", input_string, re.DOTALL)
+    if code_match:
+        extracted_code = code_match.group(1).strip()
+        return extracted_code
+    else:
+        code_match = re.search(r"```(.*)```", input_string, re.DOTALL)
+        if code_match:
+            extracted_code = code_match.group(1).strip()
+            return extracted_code
+        else:
+            print("No valid code found")
+            return None
+
+
+def extract_point_html(input_string):
+    point_examples = []
+
+    for i in range(1, 10):
+        if f"<intent_{i}>" not in input_string: continue
+        point_example = {}
+
+        # <intent> </intent> is the intent for pointing
+        intent_match = re.search(f"<intent_{i}>(.*)</intent_{i}>", input_string, re.DOTALL)
+        if intent_match: point_example["intent"] = intent_match.group(1).strip()
+
+        # <name> </name> is the name of the points
+        name_match = re.search(f"<name_{i}>(.*)</name_{i}>", input_string, re.DOTALL)
+        if name_match: point_example["name"] = name_match.group(1).strip()
+
+        # <modified_lines> </modified_lines> is the edited html
+        lines_match = re.search(f"<modified_lines_{i}>(.*)</modified_lines_{i}>", input_string, re.DOTALL)
+
+        try:
+            if lines_match: 
+                extracted_lines = lines_match.group(1).strip()
+                point_example["modified_lines"] = []
+                for line in extracted_lines.split("\n"):
+                    if "-->" in line:
+                        original, modified = line.split("-->")
+                        point_example["modified_lines"].append((original.strip(), modified.strip()))
+        except ValueError:
+            continue # Skip if invalid formatting
+
+        point_examples.append(point_example)
+
+    return point_examples
+
+
 def compute_white_px_ratio(image):
     # Compute the ratio of white pixels in the image
     white_px = 0
@@ -262,3 +452,168 @@ def fix_latex_white_text(code):
         fix = True
 
     return code, fix
+
+
+def extract_points(image, point_color="#FF69B4"):
+    # Bug with numpy causes process to freeze when using multiple threads for parallel processing due to buggy OpenBLAS implementation installed
+    # https://github.com/numpy/numpy/issues/17752#issuecomment-1359079118
+    with threadpool_limits(limits=1, user_api='blas'): 
+        # input is a image with some points with the color of point_color
+        # output is a list of (x, y) coordinates of the points
+        # the idea is to do some clustering that pixels with the color of point_color that are connected will be considered as one point
+
+        # convert the image to a numpy array
+        image = image.convert("RGB")
+        image_array = np.array(image)
+        width, height = image_array.shape[:2]
+
+        # turn the image to a binary image
+        binary_image = np.all(image_array == np.array(ImageColor.getcolor(point_color, "RGB")), axis=-1)
+
+        # get the coordinates of the points
+        points = np.argwhere(binary_image)
+
+        def check_connected(target_point, grounp_points):
+            # check if any point in the group is connected to the target point
+            for point in grounp_points:
+                if np.linalg.norm(target_point - point) == 1:
+                    return True
+
+        # group the points that are connected
+        points = list(map(tuple, points))
+        groups = [[points[0]]]
+        if len(points) > 1500:
+            print(f"Warning: Extracted {len(points)} pixels for the point color from the image. Too many random pixels match the point color {point_color} in {image}, so this point for this image will be skipped.")
+            raise RuntimeError("Skip the current point because too many random pixels match the point's color.")
+
+        for point in points[1:]:
+            connected = False
+            for group in groups:
+                if check_connected(np.array(point), np.array(group)):
+                    group.append(point)
+                    connected = True
+                    break
+            if not connected:
+                groups.append([point])
+        
+        # get the center of each group
+        centers = []
+        for group in groups:
+            group = np.array(group)
+            center = np.mean(group, axis=0)
+            centers.append(center.tolist())
+        
+        # normalized points will be (x,y) coordinates in the range of [0, 100], upper left corner is (0, 0)
+        normalized_centers = [{"x": round(center[1] / height * 100, 1), "y": round(center[0] / width * 100, 1)} for center in centers]
+        return centers, normalized_centers
+
+
+def get_a_different_color(image):
+    # Convert the image to RGB and then to a NumPy array
+    image = image.convert("RGB")
+    image_array = np.array(image)
+
+    # Get all unique colors in the image in hex format
+    unique_colors = set(
+        "#{:02x}{:02x}{:02x}".format(r, g, b)
+        for r, g, b in image_array.reshape(-1, 3)
+    )
+
+    # Load CSS4 colors from Matplotlib
+    available_colors = list(mcolors.CSS4_COLORS.values())
+
+    # Find the first color in available_colors not in unique_colors
+    for color in available_colors:
+        if color not in unique_colors:
+            return color
+
+    # Fallback if all predefined colors are in the image
+    return "#000000" if "#000000" not in unique_colors else "#FFFFFF"
+
+
+def find_unused_color(image):
+    """
+    Finds a color (hex code) that does not exist in the given PIL image.
+
+    :param image: A PIL.Image object.
+    :return: A hex color code (string) that is not present in the image.
+    """
+    # Convert the image to RGB and get all pixel colors
+    image = image.convert("RGB")
+    pixels = set(image.getdata())
+
+    # Generate random colors until we find one that is not in the image
+    while True:
+        # Generate a random RGB color
+        random_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        if random_color not in pixels:
+            # Convert to hex code and return
+            return "#{:02x}{:02x}{:02x}".format(*random_color)
+
+
+def insert_point_style_to_html(html_code, color="#FF69B4"):
+    pointing_style = """
+/* Styles for the points */
+.point-container {
+    position: relative;
+    display: inline-block;
+}
+
+.location-point {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: COLOR;
+    z-index: 1000;
+    left: 50%; /* Changed from left: 0 to left: 50% */
+    top: 50%;
+    transform: translate(-50%, -50%); /* Changed to translate both X and Y */
+}
+"""
+    pointing_style = pointing_style.replace("COLOR", color)
+    # insert the pointing style to the html code
+    html_code = html_code.replace("</style>", pointing_style + "\n</style>")
+
+    return html_code
+
+
+def modify_html(html_code, modified_lines):
+    updated_html = []
+    for line in html_code.split("\n"):
+        replaced = False
+        for original, modified in modified_lines:
+            if original in line:
+                updated_html.append(line.replace(original, modified))
+                modified_lines = modified_lines[1:]
+                replaced = True
+                break
+        if not replaced: updated_html.append(line)
+        
+    return "\n".join(updated_html)
+
+
+def draw_points(image, list_of_points):
+    # make a copy of the image
+    image = image.copy()
+    
+    # Define colors for PIL in RGB format
+    colors = ["#FF0000", "#008000", "#0000FF", "#FFFF00", "#FFC0CB", 
+              "#FFA500", "#800080", "#00FFFF", "#A52A2A", "#00FF00"]
+    
+    draw = ImageDraw.Draw(image)
+    
+    for i, points in enumerate(list_of_points):
+        color = colors[i % len(colors)]  # Loop through colors if there are more points than colors
+        for point in points:
+            y, x = point
+            # Draw an ellipse representing a circle with a 10-pixel radius centered at (x, y)
+            draw.ellipse((x - 10, y - 10, x + 10, y + 10), fill=color)
+
+    return image
+            
+
+if __name__ == "__main__":
+    # Test the image processing function
+    image = Image.open("1.png")
+    image = image.convert("RGB")
+    print(get_a_different_color(image))

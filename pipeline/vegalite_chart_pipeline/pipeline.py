@@ -14,9 +14,6 @@ class VegaLiteChartPipeline(SuperStep):
         self.register_arg(
             "batch_size", required=True, help="The batch size to use with the LLM."
         )
-        self.register_arg(
-            "code_batch_size", required=True, help="The batch size to use with the code LLM."
-        )
         self.register_arg("n", required=True, help="The number of topics to generate.")
         self.register_arg("seed", required=True, help="The seed to use for generation.")
         self.register_arg("figure_types", required=True, help="The figure types to use.")
@@ -67,7 +64,7 @@ class VegaLiteChartPipeline(SuperStep):
             },
             args={
                 "llm": self.args["code_llm"],
-                "batch_size": self.args["code_batch_size"],
+                "batch_size": self.args["batch_size"],
             },
         )
 

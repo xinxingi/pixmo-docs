@@ -44,7 +44,7 @@ class GenerateTableQA(SuperStep):
         qa_prompts_dataset = combined_inputs.map(
             lambda row: {
                 "prompt": GENERATE_TABLE_QA_PROMPT.format(
-                    topic=row["topic"], data=row["data"], code=row["code"], persona=json.loads(row["metadata"])["persona"], figure_type=json.loads(row["metadata"])["figure_type"]
+                    topic=row["topic"], data=row["data"], code=row["code"], persona=json.loads(row["metadata"])["persona"]
                 )
             },
             remove_columns=["image"],

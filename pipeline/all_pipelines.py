@@ -13,15 +13,31 @@ from .latex_chart_pipeline import LaTeXChartPipeline
 from .html_chart_pipeline import HTMLChartPipeline
 
 from .latex_table_pipeline import LaTeXTablePipeline
+from .matplotlib_table_pipeline import MatplotlibTablePipeline
 from .plotly_table_pipeline import PlotlyTablePipeline
 from .html_table_pipeline import HTMLTablePipeline
 
 from .latex_document_pipeline import LaTeXDocumentPipeline
 from .html_document_pipeline import HTMLDocumentPipeline
+from .docx_document_pipeline import DOCXDocumentPipeline
 
 from .graphviz_diagram_pipeline import GraphvizDiagramPipeline
 from .latex_diagram_pipeline import LaTeXDiagramPipeline
 from .mermaid_diagram_pipeline import MermaidDiagramPipeline
+
+from .dalle_image_pipeline import DALLEImagePipeline
+
+from .rdkit_chemical_pipeline import RdkitChemicalPipeline
+from .latex_math_pipeline import LaTeXMathPipeline
+from .lilypond_music_pipeline import LilyPondMusicPipeline
+from .schemdraw_circuit_pipeline import SchemdrawCircuitPipeline
+from .latex_circuit_pipeline import LaTeXCircuitPipeline
+
+from .svg_graphic_pipeline import SVGGraphicPipeline
+from .asymptote_graphic_pipeline import AsymptoteGraphicPipeline
+
+from .html_document_point_pipeline import HTMLDocumentPointPipeline
+from .html_screen_pipeline import HTMLScreenPipeline
 
 def run_datadreamer_session(args):
     if args.qa:
@@ -44,16 +60,16 @@ def run_datadreamer_session(args):
         )
 
         claude_sonnet = CustomAnthropic(
-            model_name="claude-3-5-sonnet-20240620",
+            model_name="claude-3-7-sonnet-20250219",
             api_key=args.anthropic_api_key,
         )
 
         if args.llm == "gpt-4o": llm = gpt_4o
-        elif args.llm == "claude-sonnet": llm = claude_sonnet
+        elif args.llm == "claude-3-7-sonnet-20250219": llm = claude_sonnet
         elif args.llm == "gpt-4o-mini": llm = gpt_4o_mini
 
         if args.code_llm == "gpt-4o": code_llm = gpt_4o
-        elif args.code_llm == "claude-sonnet": code_llm = claude_sonnet
+        elif args.code_llm == "claude-3-7-sonnet-20250219": code_llm = claude_sonnet
         elif args.code_llm == "gpt-4o-mini": code_llm = gpt_4o_mini
 
         # Choose which pipelines to run
@@ -64,13 +80,25 @@ def run_datadreamer_session(args):
             "Generate LaTeX Charts": LaTeXChartPipeline,
             "Generate HTML Charts": HTMLChartPipeline,
             "Generate LaTeX Tables": LaTeXTablePipeline,
+            "Generate Matplotlib Tables": MatplotlibTablePipeline,
             "Generate Plotly Tables": PlotlyTablePipeline,
             "Generate HTML Tables": HTMLTablePipeline,
             "Generate LaTeX Documents": LaTeXDocumentPipeline,
             "Generate HTML Documents": HTMLDocumentPipeline,
+            "Generate DOCX Documents": DOCXDocumentPipeline,
             "Generate Graphviz Diagrams": GraphvizDiagramPipeline,
             "Generate LaTeX Diagrams": LaTeXDiagramPipeline,
             "Generate Mermaid Diagrams": MermaidDiagramPipeline,
+            "Generate DALL-E Images": DALLEImagePipeline,
+            "Generate Chemical Structures": RdkitChemicalPipeline,
+            "Generate LaTeX Math": LaTeXMathPipeline,
+            "Generate Lilypond Music": LilyPondMusicPipeline,
+            "Generate SchemDraw Circuits": SchemdrawCircuitPipeline,
+            "Generate LaTeX Circuits": LaTeXCircuitPipeline,
+            "Generate SVG Graphics": SVGGraphicPipeline,
+            "Generate Asymptote Graphics": AsymptoteGraphicPipeline,
+            "Generate HTML Points": HTMLDocumentPointPipeline,
+            "Generate HTML Screens": HTMLScreenPipeline,
         }
         pipelines = {
             k: v
