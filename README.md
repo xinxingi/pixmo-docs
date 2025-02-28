@@ -1,6 +1,6 @@
 # pixmo-docs
 
-This is the repository for the generation system of the [PixMo-Docs](https://huggingface.co/datasets/allenai/CoSyn-400K) and [PixMo-Docs Point](https://huggingface.co/datasets/allenai/CoSyn-point) datasets, which support the generation of synthetic charts, tables, diagrams and more. The older v0 datasets used to train [Molmo](https://arxiv.org/abs/2409.17146) can be [here](https://huggingface.co/datasets/allenai/pixmo-docs).
+This is the repository for the generation system of the [PixMo-Docs](https://huggingface.co/datasets/allenai/pixmo-docs), [CoSyn-400K](https://huggingface.co/datasets/allenai/CoSyn-400K), and [CoSyn-point](https://huggingface.co/datasets/allenai/CoSyn-point) datasets. PixMo-Docs was used to train the [Molmo](https://arxiv.org/abs/2409.17146) model, and the CoSyn datasets are an expanded version that use an improved pipeline and more types of documents.
 
 ## Installation
 After cloning the repo, you can install the required dependencies using the following commands:
