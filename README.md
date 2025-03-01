@@ -1,6 +1,6 @@
 # pixmo-docs
 
-This is the repository for the generation system of the [PixMo-Docs](https://huggingface.co/datasets/allenai/pixmo-docs), [CoSyn-400K](https://huggingface.co/datasets/allenai/CoSyn-400K), and [CoSyn-point](https://huggingface.co/datasets/allenai/CoSyn-point) datasets. PixMo-Docs was used to train the [Molmo](https://arxiv.org/abs/2409.17146) model, and the CoSyn datasets are an expanded version that use an improved pipeline and more types of documents.
+This is the repository for the generation system of the [PixMo-Docs](https://huggingface.co/datasets/allenai/pixmo-docs), [CoSyn-400K](https://huggingface.co/datasets/allenai/CoSyn-400K), and [CoSyn-point](https://huggingface.co/datasets/allenai/CoSyn-point) datasets. PixMo-Docs was used to train the [Molmo](https://arxiv.org/abs/2409.17146) model, and the CoSyn datasets are an expanded version that use an improved pipeline and more types of documents. More details can be found in our [paper](https://arxiv.org/pdf/2502.14846).
 
 ## Installation
 After cloning the repo, you can install the required dependencies using the following commands:
@@ -111,7 +111,7 @@ We released 25 pipelines to generate eight main categories of text-rich images: 
 
 
 ## Citation
-Please cite the following papers if you use this code in your work.
+Please cite the following papers if you use this codebase or our datasets in your work.
 
 ```bibtex
 @article{yang2025scaling,
