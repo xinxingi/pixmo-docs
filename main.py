@@ -4,6 +4,8 @@ from argparse import ArgumentParser
 from pipeline import run_datadreamer_session
 from pipeline.utils.gpt4o_support import datadreamer_gpt4o_support
 
+from dotenv import load_dotenv
+load_dotenv()
 
 def main(args):
     with datadreamer_gpt4o_support():
