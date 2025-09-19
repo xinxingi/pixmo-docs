@@ -9,3 +9,4 @@ session_output/
 *.html
 *.pdf
 selected_personas.txt
+.env
