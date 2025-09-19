@@ -10,3 +10,4 @@ session_output/
 *.pdf
 selected_personas.txt
 .env
+.idea
