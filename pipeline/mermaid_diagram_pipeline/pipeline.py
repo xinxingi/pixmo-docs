@@ -5,6 +5,8 @@ from .generate_diagram_data import GenerateDiagramData
 from .generate_diagram import GenerateDiagram
 from .generate_qa import GenerateDiagramQA
 
+import os
+
 
 class MermaidDiagramPipeline(SuperStep):
     def setup(self):
@@ -27,7 +29,7 @@ class MermaidDiagramPipeline(SuperStep):
         self.register_output("code")
         self.register_output("image")
 
-        if self.args["qa"]: self.register_output("qa")
+        if os.environ["GENERATE_QA"] == "true": self.register_output("qa")
 
     def run(self):
         # Generate Topics
