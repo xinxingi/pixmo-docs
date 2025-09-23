@@ -59,19 +59,12 @@ def extract_arrow_dataset(arrow_file_path="data-00000-of-00001.arrow",
                         image = Image.open(io.BytesIO(value))
                         print(f"  - 从字节数据创建 PIL Image")
 
-                        # 保存为 PNG 文件  
+                    # 保存为 PNG 文件
                     image_filename = f"image_{i}.png"
                     image_path = output_path / image_filename
                     image.save(image_path)
 
-                    # 转换为 base64：先保存到内存中的字节流  
-                    img_buffer = io.BytesIO()
-                    image.save(img_buffer, format='PNG')
-                    img_bytes = img_buffer.getvalue()
-                    image_base64 = base64.b64encode(img_bytes).decode('utf-8')
-
                     extracted_row[f'{column_name}_file'] = image_filename
-                    extracted_row[f'{column_name}_base64'] = image_base64
 
                     print(f"  - 图像已保存: {image_filename}")
 
