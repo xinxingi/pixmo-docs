@@ -57,7 +57,7 @@ Please provide the elements in JSON format without additional text at the beginn
 
 
 
-GENERATE_DIAGRAM_QA_PROMPT = """You are an expert in data analysis and good at asking questions about diagrams.
+GENERATE_DIAGRAM_QA_PROMPT = {"English":""""You are an expert in data analysis and good at asking questions about diagrams.
 My persona is: "{persona}"
 I want you to generate some question-answer pairs of a {figure_type} about {topic}, which I would ask.
 Instead of showing the figure, I provide the data and the code that generates the figure.
@@ -94,7 +94,49 @@ Which group has the highest value? A. Group-1 B. Group-2 C. Group-3 | B | Group-
 
 ... ...
 
-Do not include any additional text at the beginning or end of your response."""
+Do not include any additional text at the beginning or end of your response.""",
+
+"Chinese":""""
+您是数据分析专家，并且擅长就图表提问。
+我的角色是：“{persona}”
+我希望您生成一些关于{topic}的{figure_type}问答对，我会问这个问题。
+我不会展示图表，而是提供数据和生成图表的代码。
+
+数据如下：
+<data>
+{data}
+</data>
+
+生成图表的代码如下：
+<code>
+{code}
+</code>
+
+请列出一系列*合理的问题*，以便人们在看到渲染后的图表时会提出这些问题。要求如下：
+1. **提问风格**：问题必须自然流畅，并与图表相关，有助于解读数据并理解其中的见解。
+(1) 问题的复杂程度各不相同。有些问题只需参考图即可轻松回答，而有些问题则颇具挑战性，需要多步推理。
+(2) 问题应该能够基于图表中的*视觉信息*进行回答。请勿在问题中包含任何编码细节，因为此类信息在图中不可见。
+
+2. **问题类型**：大多数问题为简答题，但有些问题可以是多项选择题、是非题或总结题。您可以使用以下类型：
+(1) 简答题：至少 5 道简答题。
+(2) 多项选择题：至少应有两道多项选择题。选项数量可以是 3、4、5 或更多。选项标签可以是不同的类型：字母、阿拉伯数字或罗马数字。每个问题的正确选项应该不同。
+(3) 是/否（真/假）：至少 1 道二元题。
+(4) 总结题：至少 1 道总结题，要求描述*整个图形*或为图形撰写标题。
+(5) 无法回答：至少 1 道题无法根据图中的视觉信息进行回答。这个问题的答案可以是“无法确定”、“信息不足”、“我不知道”等等。
+
+3. **提供解释**：除了每个问题的*简洁答案*外，还要提供详细说明得出答案的推理步骤的解释。对于总结性问题，解释是对图表的更详细描述。
+
+4. **答案格式**：用 | 字符分隔问题、答案和解释：问题 | 答案 | 解释。问答对之间应使用双换行符 (\n\n) 分隔。
+例如：
+A 和 B 之间的差是多少？| 15 | A 是 10，B 是 25，所以差值为 25-10=15
+
+哪一组的值最高？A. 组 1 B. 组 2 C. 组 3 | B | 组 1 是 20，组 2 是 25，组 3 是 15，所以组 2 的值最高。
+
+……
+
+请勿在回复的开头或结尾添加任何附加文字。
+"""
+}
 
 
 
@@ -226,8 +268,8 @@ Please don't answer with any additional text in the script. Your whole response 
 
 请编写 Mermaid 代码，使用提供的数据生成{figure_type}。要求如下：
 要求如下：
-1. **样式要求**：
-(1) 尝试发挥创意，更改默认参数（例如字体、颜色、标记等），使图表样式独一无二。
+1. **布局要求**：  
+(1) 尝试发挥创意，选择合适的图表类型和布局结构，使图表逻辑清晰。  
 (2) 考虑**数据比例**，选择合适的设计比例（图表大小、节点/边大小等），确保图表中的信息清晰易懂，避免文本重叠等。
 
 2. **代码要求**：

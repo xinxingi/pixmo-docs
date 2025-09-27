@@ -59,6 +59,12 @@ class GenerateDiagram(SuperStep):
             },
         )
 
+        # === DEBUG: 查看上游是否真的只有 1 条 ===
+        self.logger.info(f"[DEBUG] 输入行数: {combined_inputs.output.num_rows}")
+        if combined_inputs.output.num_rows == 0:
+            self.logger.warning("[DEBUG] 上游为空，后面不会产生任何 Prompt")
+            return combined_inputs.output  # 或直接 return
+
         # Create prompts
         prompts_dataset = combined_inputs.map(
             lambda row: {
@@ -72,6 +78,10 @@ class GenerateDiagram(SuperStep):
             lazy=False,
             name="Create Generate Code Prompts",
         )
+
+        # === DEBUG: 打印第 1 个 Prompt ===
+        first_prompt = prompts_dataset.output["prompt"][0]
+        self.logger.info(f"[PROMPT 0] =====\n{first_prompt}\n-----")
 
         # Generate Code
         generated_code = Prompt(
@@ -90,6 +100,10 @@ class GenerateDiagram(SuperStep):
                 "generations": "code",
             },
         ).select_columns(["code"], name="Get Generated Code")
+
+        # === DEBUG: 打印第 1 个模型返回（提取后）===
+        first_code = generated_code.output["code"][0]
+        self.logger.info(f"[GENERATION 0] =====\n{first_code}\n-----")
 
         # Combine with generations with inputs
         combined = zipped(
