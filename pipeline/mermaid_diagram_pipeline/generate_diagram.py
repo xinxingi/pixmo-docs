@@ -115,10 +115,27 @@ class GenerateDiagram(SuperStep):
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     self.logger.info(f"[DEBUG] 渲染 code: {repr(row['code'])}")
-                    image = render_mermaid(row["code"])
-                    if not isinstance(image, Image.Image):
-                        raise TypeError()
-                    row["image"] = crop_whitespace(process_image(image))
+                    image = None
+                    last_exception = None
+                    for attempt in range(3):
+                        try:
+                            image = render_mermaid(row["code"])
+                            if not isinstance(image, Image.Image):
+                                raise TypeError()
+                            break  # 成功则跳出循环
+                        except Exception as e:
+                            last_exception = e
+                            self.logger.info(f"[DEBUG] 渲染重试 {attempt+1}/3 失败: {e}")
+                            image = None
+                    if image is not None and isinstance(image, Image.Image):
+                        row["image"] = crop_whitespace(process_image(image))
+                    else:
+                        if isinstance(last_exception, TimeoutException):
+                            print(f"Error: Code execution exceeded {timeout} seconds.")
+                            row["image"] = render_error_image("渲染超时")
+                        else:
+                            print(f"Error: {last_exception}")
+                            row["image"] = render_error_image("渲染失败")
             except TimeoutException:
                 print(f"Error: Code execution exceeded {timeout} seconds.")
                 row["image"] = render_error_image("渲染超时")
