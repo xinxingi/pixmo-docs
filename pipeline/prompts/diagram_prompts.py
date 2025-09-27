@@ -42,16 +42,43 @@ Here are the requirements:
 5. All elements must be in English, even if the persona is non-English.
 Please provide the elements in JSON format without additional text at the beginning or end.""",
 
-"Chinese":""""您是图表设计专家，并且对各种主题都有广泛的了解。
-我的角色是：“{persona}”
-我需要一些关于“{topic}”的元素，用于生成一个 {figure_type}。
+"Chinese":""""
+您是图表设计专家，并且对各种主题都有广泛的了解。
+我的角色是："{persona}"
+我需要一些关于"{topic}"的元素，用于生成一个{figure_type}。
+
 要求如下：
-1. 元素应与主题相关，并根据我的角色进行定制。其结构必须适合 {figure_type}。
-2. 元素应切合实际，内容应使用真实世界的实体命名。请勿使用 xxA、xxB 等占位符名称。
-3. 元素数量不宜过多，只需提供图表所需的关键信息即可。
-4. 每个节点/边的文本应简洁明了，不宜过长，以便于查看者理解。
-5. 所有元素都必须使用中文，即使角色不是中文的。
-请以 JSON 格式提供元素，且开头和结尾均不得包含任何额外文本。"""
+1. 元素应与主题相关，并根据我的角色进行定制，结构必须适合{figure_type}。
+2. 元素应切合实际，内容应使用真实世界的实体命名，请勿使用占位符。
+3. 元素数量适中，只需提供图表所需的关键信息。
+4. 每个节点的文本应简洁明了，便于理解。
+5. 所有元素都必须使用中文。
+
+严格按照以下JSON格式输出，不得有任何偏差：
+{{
+  "nodes": [
+    {{
+      "id": "step1",
+      "label": "步骤一标题",
+      "description": "步骤描述"
+    }},
+    {{
+      "id": "step2", 
+      "label": "步骤二标题",
+      "description": "步骤描述"
+    }}
+  ],
+  "edges": [
+    {{
+      "from": "step1",
+      "to": "step2",
+      "label": "连接描述"
+    }}
+  ]
+}}
+
+请严格按照此格式输出JSON，开头和结尾不得包含任何额外文本。
+"""
 }
 
 
@@ -257,9 +284,10 @@ Here are the requirements:
 
 Please don't answer with any additional text in the script. Your whole response should be the Mermaid code, which can be directly executed.""",
 
-"Chinese":""""您是数据分析专家，并且擅长编写 Mermaid 代码来生成图表和图形。
-我的角色是：“{persona}”
-我有一些关于{topic}的数据，可以用来生成{figure_type}。
+"Chinese":""""
+您是数据分析专家，擅长编写标准的Mermaid代码来生成图表。
+我的角色是："{persona}"
+我有关于{topic}的数据，需要生成{figure_type}。
 
 数据如下：
 <data>
@@ -267,20 +295,31 @@ Please don't answer with any additional text in the script. Your whole response 
 </data>
 
 请编写 Mermaid 代码，使用提供的数据生成{figure_type}。要求如下：
-要求如下：
-1. **布局要求**：  
-(1) 尝试发挥创意，选择合适的图表类型和布局结构，使图表逻辑清晰。  
-(2) 考虑**数据比例**，选择合适的设计比例（图表大小、节点/边大小等），确保图表中的信息清晰易懂，避免文本重叠等。
+严格要求：
+1. 语法规范：
+   - 流程图开头：flowchart LR 或 flowchart TD
+   - 节点ID必须是英文字母+数字组合（如A1, B2, START等）
+   - 中文内容放在方括号内：A1[中文标签]
+   - 连接语法：A1 --> B2
+   
+2. 正确示例：
+flowchart LR
+    A1[开始] --> B1[数据收集]
+    B1 --> C1[数据分析]
+    C1 --> D1[结果输出]
 
-2. **代码要求**：
-(1) 您需要将提供的数据硬编码到 Mermaid 脚本中以生成图表。请谨慎使用 Mermaid 脚本的语法和格式。您可以重新格式化或选择部分数据以适应 Mermaid 语法。
-(2) 根据图表类型和数据选择合适的 Mermaid 类型。可用类型包括：流程图、序列图、类图、状态图、事件图、甘特图、旅程图、象限图、思维导图、时间线图等。
-(3) 请勿尝试在图表中添加图标或图像。请仅使用 Mermaid 的内置功能。请勿在 Mermaid 代码中使用任何样式语法。
+3. 禁止事项：
+   - 禁止直接使用中文作为节点ID
+   - 禁止使用样式和颜色语法
+   - 禁止添加图标或特殊符号
 
-3. **输出要求**：
-在脚本开头加上 ```mermaid，在脚本结尾加上 ```，以将代码与文本分隔开来。这将有助于我轻松提取代码。
+4. 输出格式：
+   - 仅输出纯Mermaid代码
+   - 代码开头：```mermaid
+   - 代码结尾：```
+   - 不添加任何其他文本
 
-请勿在脚本中添加任何其他文本。您的完整回复应为 Mermaid 代码，可直接执行。
+请根据数据生成符合语法的Mermaid流程图代码。
 """
 }
 

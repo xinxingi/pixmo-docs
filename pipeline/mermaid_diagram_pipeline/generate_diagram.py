@@ -1,12 +1,7 @@
 import os
 import tempfile
-import platform
-import subprocess
 import json
-import random
 import warnings
-import pandas as pd
-from io import StringIO
 import signal
 
 from PIL import Image
@@ -17,7 +12,9 @@ from ..prompts.diagram_prompts import GENERATE_DIAGRAM_CODE_MERMAID_PROMPT
 from ..utils.utils import extract_mermaid, process_image
 from ..utils.render import render_mermaid, crop_whitespace
 
-NUM_RENDER_WORKERS = 4
+# 我就搞不懂咧，别的都是 1 我们咋是 4 呢
+# RuntimeError: One of the subprocesses has abruptly died during map operation.To debug the error, disable multiprocessing.
+NUM_RENDER_WORKERS = 1
 
 
 class TimeoutException(Exception):
@@ -59,11 +56,6 @@ class GenerateDiagram(SuperStep):
             },
         )
 
-        # === DEBUG: 查看上游是否真的只有 1 条 ===
-        self.logger.info(f"[DEBUG] 输入行数: {combined_inputs.output.num_rows}")
-        if combined_inputs.output.num_rows == 0:
-            self.logger.warning("[DEBUG] 上游为空，后面不会产生任何 Prompt")
-            return combined_inputs.output  # 或直接 return
 
         # Create prompts
         prompts_dataset = combined_inputs.map(
@@ -101,9 +93,6 @@ class GenerateDiagram(SuperStep):
             },
         ).select_columns(["code"], name="Get Generated Code")
 
-        # === DEBUG: 打印第 1 个模型返回（提取后）===
-        first_code = generated_code.output["code"][0]
-        self.logger.info(f"[GENERATION 0] =====\n{first_code}\n-----")
 
         # Combine with generations with inputs
         combined = zipped(
