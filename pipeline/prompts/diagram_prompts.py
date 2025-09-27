@@ -53,6 +53,7 @@ Please provide the elements in JSON format without additional text at the beginn
 3. 元素数量适中，只需提供图表所需的关键信息。
 4. 每个节点的文本应简洁明了，便于理解。
 5. 所有元素都必须使用中文。
+6. 如流程过长，请合并部分步骤为更高层级节点，保证图形简洁易读。
 
 严格按照以下JSON格式输出，不得有任何偏差：
 {{
@@ -301,6 +302,7 @@ Please don't answer with any additional text in the script. Your whole response 
    - 节点ID必须是英文字母+数字组合（如A1, B2, START等）
    - 中文内容放在方括号内：A1[中文标签]
    - 连接语法：A1 --> B2
+   - 如节点较多，请适当分支或分层展示，保证图形美观。
    
 2. 正确示例：
 flowchart LR
