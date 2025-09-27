@@ -4,7 +4,7 @@ import json
 import warnings
 import signal
 
-from PIL import Image, ImageDraw
+from PIL import Image
 from datasets.fingerprint import Hasher
 from datadreamer.steps import DataSource, SuperStep, Prompt, zipped
 
@@ -88,12 +88,6 @@ class GenerateDiagram(SuperStep):
             },
         ).select_columns(["code"], name="Get Generated Code")
 
-        # 日志：输出生成的 code 数量和内容
-        codes = list(generated_code.output["code"])
-        self.logger.info(f"[DEBUG] Prompt生成后 code 数量: {len(codes)}")
-        for idx, c in enumerate(codes):
-            self.logger.info(f"[DEBUG] code[{idx}]: {repr(c)}")
-
         # Combine with generations with inputs
         combined = zipped(
             combined_inputs, generated_code, name="Combine with inputs"
@@ -101,51 +95,32 @@ class GenerateDiagram(SuperStep):
 
         # Generate Images
         def execute_code_and_generate_image(row, timeout=20):
-            def render_error_image(text="渲染失败"):
-                img = Image.new('RGB', (400, 100), color=(255, 255, 255))
-                d = ImageDraw.Draw(img)
-                d.text((10, 40), text, fill=(255, 0, 0))
-                return img
-
             original_dir = os.getcwd()
             os.chdir(tempfile.mkdtemp())
             signal.signal(signal.SIGALRM, timeout_handler)
             signal.alarm(timeout)  # set the timeout
+
             try:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
-                    self.logger.info(f"[DEBUG] 渲染 code: {repr(row['code'])}")
-                    image = None
-                    last_exception = None
-                    for attempt in range(3):
-                        try:
-                            image = render_mermaid(row["code"])
-                            if not isinstance(image, Image.Image):
-                                raise TypeError()
-                            break  # 成功则跳出循环
-                        except Exception as e:
-                            last_exception = e
-                            self.logger.info(f"[DEBUG] 渲染重试 {attempt+1}/3 失败: {e}")
-                            image = None
-                    if image is not None and isinstance(image, Image.Image):
-                        row["image"] = crop_whitespace(process_image(image))
-                    else:
-                        if isinstance(last_exception, TimeoutException):
-                            print(f"Error: Code execution exceeded {timeout} seconds.")
-                            row["image"] = render_error_image("渲染超时")
-                        else:
-                            print(f"Error: {last_exception}")
-                            row["image"] = render_error_image("渲染失败")
+                    image = render_mermaid(row["code"])
+
+                    if not isinstance(image, Image.Image):
+                        raise TypeError()
+
+                    # row["image"] = crop_whitespace(process_image(image))
+                    row["image"] = image
+
             except TimeoutException:
                 print(f"Error: Code execution exceeded {timeout} seconds.")
-                row["image"] = render_error_image("渲染超时")
+                row["image"] = None
             except Exception as e:
                 print(f"Error: {e}")
-                row["image"] = render_error_image("渲染失败")
+                row["image"] = None
             finally:
                 signal.alarm(0)  # disable the alarm
                 os.chdir(original_dir)
-            self.logger.info(f"[DEBUG] 渲染结果 image is None: {row['image'] is None}")
+
             return row
 
         code_and_images = combined.map(
@@ -154,11 +129,6 @@ class GenerateDiagram(SuperStep):
             save_num_proc=NUM_RENDER_WORKERS,
             name="Generate Images",
         )
-
-        # 日志：输出生成图片前后的数据量
-        total_rows = code_and_images.output.num_rows
-        valid_images = sum(1 for row in code_and_images.output if row["image"] is not None)
-        self.logger.info(f"[DEBUG] 生成图片后总行数: {total_rows}, 有效图片数: {valid_images}")
 
         # Remove any invalid images
         filtered = code_and_images.filter(
