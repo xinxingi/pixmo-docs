@@ -108,8 +108,7 @@ class GenerateDiagram(SuperStep):
                     if not isinstance(image, Image.Image):
                         raise TypeError()
 
-                    # row["image"] = crop_whitespace(process_image(image))
-                    row["image"] = image
+                    row["image"] = crop_whitespace(process_image(image))
 
             except TimeoutException:
                 print(f"Error: Code execution exceeded {timeout} seconds.")
