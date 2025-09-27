@@ -106,6 +106,14 @@ if __name__ == "__main__":
         help="whether to generate QA for the visualizations.",
     )
 
+    parser.add_argument(
+        "-lang",
+        "--language",
+        type=str,
+        default="English",
+        help="Which country do you want to generate a dataset for",
+    )
+
     args = parser.parse_args()
 
     print("LLM:", args.llm)

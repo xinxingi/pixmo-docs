@@ -47,6 +47,8 @@ class GenerateDiagram(SuperStep):
         self.register_output("code")
         self.register_output("image")
 
+        self.register_arg("language", required=True, help="The language to use.")
+
     def run(self):
         combined_inputs = DataSource(
             "Combine inputs",
@@ -60,7 +62,7 @@ class GenerateDiagram(SuperStep):
         # Create prompts
         prompts_dataset = combined_inputs.map(
             lambda row: {
-                "prompt": GENERATE_DIAGRAM_CODE_MERMAID_PROMPT.format(
+                "prompt": GENERATE_DIAGRAM_CODE_MERMAID_PROMPT[self.args['language'].strip()].format(
                     topic=row["topic"],
                     figure_type=json.loads(row["metadata"])["figure_type"],
                     data=row["data"],

@@ -18,6 +18,7 @@ class GenerateDiagramData(SuperStep):
         self.register_arg(
             "batch_size", required=True, help="The batch size to use with the LLM."
         )
+        self.register_arg("language", required=True, help="The language to use.")
         self.register_output("metadata")
         self.register_output("topic")
         self.register_output("data")
@@ -34,7 +35,7 @@ class GenerateDiagramData(SuperStep):
         # Create prompts
         prompts_dataset = combined_inputs.map(
             lambda row: {
-                "prompt": GENERATE_DIAGRAM_DATA_JSON_PROMPT.format(
+                "prompt": GENERATE_DIAGRAM_DATA_JSON_PROMPT[self.args['language'].strip()].format(
                     topic=row["topic"],
                     figure_type=json.loads(row["metadata"])["figure_type"],
                     persona=json.loads(row["metadata"])["persona"],

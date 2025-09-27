@@ -129,6 +129,7 @@ def run_datadreamer_session(args):
                     "seed": args.seed,
                     "figure_types": figure_types,
                     "qa": args.qa,
+                    "language": args.language,
                 },
                 force=args.force,
             )

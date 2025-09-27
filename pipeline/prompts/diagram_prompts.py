@@ -1,9 +1,8 @@
 NUM_TOPICS = 5
 
 
-
-
-GENERATE_DIAGRAM_TOPICS_PROMPT = """You are an expert in diagram design and have a broad knowledge of different topics.
+GENERATE_DIAGRAM_TOPICS_PROMPT = {
+"English":"""You are an expert in diagram design and have a broad knowledge of different topics.
 My persona is: "{persona}"
 I want you to generate {num_topics} topics for {figure_type} that I will be interested in or I may see during my daily life given my persona.
 
@@ -13,11 +12,26 @@ Here are the requirements:
 3. The topics are conditioned on the diagram type. Please ensure the topics you provided can be best visualized in "{figure_type}".
 4. All topics must be in English, even if the persona is non-English.
 5. List {num_topics} topics for "{persona}" and separate them with a | character, e.g., topic1 | topic2 | ...... | topic{num_topics}.
-Do not include any additional text at the beginning or end of your response."""
+Do not include any additional text at the beginning or end of your response.""",
+
+"Chinese":"""您是图表设计专家，并且对不同主题拥有广泛的了解。
+我的角色是：“{persona}”
+我希望您为 {figure_type} 生成 {num_topics} 个我感兴趣或可能在日常生活中看到的主题，这些主题与我的角色相关。
+
+要求如下：
+1. 每个主题都是 {figure_type} 内容的高级摘要，并包含一些设计细节，例如“2022 年 1 月的水电费账单，其中包含详细的费用明细”。
+2. 主题应多样化，以便我生成各种图表。每个主题都应独一无二，且不能与其他主题重叠。
+3. 主题取决于图表类型。请确保您提供的主题在“{figure_type}”中能够最佳地可视化。
+4. 所有主题都必须使用中文，即使角色不是中文的。
+5. 列出“{persona}”的 {num_topics} 个主题，并用 | 分隔。字符，例如，topic1 | topic2 | ...... | topic{num_topics}。
+请勿在回复的开头或结尾添加任何其他文本。"""
+}
 
 
 
-GENERATE_DIAGRAM_DATA_JSON_PROMPT = """You are an expert in diagram design and have broad knowledge about various topics.
+
+GENERATE_DIAGRAM_DATA_JSON_PROMPT = {
+"English":""""You are an expert in diagram design and have broad knowledge about various topics.
 My persona is: "{persona}"
 I need some elements about "{topic}", which can be used to generate a {figure_type}. 
 Here are the requirements:
@@ -26,7 +40,19 @@ Here are the requirements:
 3. Do not provide too many elements. Just provide key pieces of information that are essential for the diagram. 
 4. The text for each node/edge should be concise and not too long, which can be easily understood by the viewers.
 5. All elements must be in English, even if the persona is non-English.
-Please provide the elements in JSON format without additional text at the beginning or end."""
+Please provide the elements in JSON format without additional text at the beginning or end.""",
+
+"Chinese":""""您是图表设计专家，并且对各种主题都有广泛的了解。
+我的角色是：“{persona}”
+我需要一些关于“{topic}”的元素，用于生成一个 {figure_type}。
+要求如下：
+1. 元素应与主题相关，并根据我的角色进行定制。其结构必须适合 {figure_type}。
+2. 元素应切合实际，内容应使用真实世界的实体命名。请勿使用 xxA、xxB 等占位符名称。
+3. 元素数量不宜过多，只需提供图表所需的关键信息即可。
+4. 每个节点/边的文本应简洁明了，不宜过长，以便于查看者理解。
+5. 所有元素都必须使用中文，即使角色不是中文的。
+请以 JSON 格式提供元素，且开头和结尾均不得包含任何额外文本。"""
+}
 
 
 
@@ -164,7 +190,7 @@ Please don't answer with any additional text in the script. Your whole response 
 
 
 
-GENERATE_DIAGRAM_CODE_MERMAID_PROMPT = """You are an expert in data analysis and good at writing Mermaid code to generate diagrams and graphs.
+GENERATE_DIAGRAM_CODE_MERMAID_PROMPT = {"English":""""You are an expert in data analysis and good at writing Mermaid code to generate diagrams and graphs.
 My persona is: "{persona}"
 I have some data about {topic} which can be used to generate a {figure_type}.
 
@@ -187,7 +213,34 @@ Here are the requirements:
 3. **Output Requirements**:
     Put ```mermaid at the beginning and ``` at the end of the script to separate the code from the text. This will help me easily extract the code.
 
-Please don't answer with any additional text in the script. Your whole response should be the Mermaid code, which can be directly executed."""
+Please don't answer with any additional text in the script. Your whole response should be the Mermaid code, which can be directly executed.""",
+
+"Chinese":""""您是数据分析专家，并且擅长编写 Mermaid 代码来生成图表和图形。
+我的角色是：“{persona}”
+我有一些关于{topic}的数据，可以用来生成{figure_type}。
+
+数据如下：
+<data>
+{data}
+</data>
+
+请编写 Mermaid 代码，使用提供的数据生成{figure_type}。要求如下：
+要求如下：
+1. **样式要求**：
+(1) 尝试发挥创意，更改默认参数（例如字体、颜色、标记等），使图表样式独一无二。
+(2) 考虑**数据比例**，选择合适的设计比例（图表大小、节点/边大小等），确保图表中的信息清晰易懂，避免文本重叠等。
+
+2. **代码要求**：
+(1) 您需要将提供的数据硬编码到 Mermaid 脚本中以生成图表。请谨慎使用 Mermaid 脚本的语法和格式。您可以重新格式化或选择部分数据以适应 Mermaid 语法。
+(2) 根据图表类型和数据选择合适的 Mermaid 类型。可用类型包括：流程图、序列图、类图、状态图、事件图、甘特图、旅程图、象限图、思维导图、时间线图等。
+(3) 请勿尝试在图表中添加图标或图像。请仅使用 Mermaid 的内置功能。请勿在 Mermaid 代码中使用任何样式语法。
+
+3. **输出要求**：
+在脚本开头加上 ```mermaid，在脚本结尾加上 ```，以将代码与文本分隔开来。这将有助于我轻松提取代码。
+
+请勿在脚本中添加任何其他文本。您的完整回复应为 Mermaid 代码，可直接执行。
+"""
+}
 
 
 
