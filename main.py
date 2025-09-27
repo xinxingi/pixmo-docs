@@ -101,9 +101,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-q",
         "--qa",
-        type=bool,
-        default=True,
-        help="whether to generate QA for the visualizations.",
+        type=str,
+        default="true",  # 或 "false"
+        help="whether to generate QA for the visualizations (true/false).",
     )
 
     parser.add_argument(
