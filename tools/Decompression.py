@@ -13,8 +13,7 @@ from PIL import Image
 import io
 
 
-def extract_arrow_dataset(arrow_file_path="data-00000-of-00001.arrow",
-                          output_dir="./extracted_data"):
+def extract_arrow_dataset(arrow_file_path,output_dir):
     """
     解压 Arrow 数据集文件
 
@@ -108,13 +107,16 @@ def extract_arrow_dataset(arrow_file_path="data-00000-of-00001.arrow",
 
 def main():
     try:
-        arrow_file = "data-00000-of-00001.arrow"
+        # 设置 Arrow 文件路径和输出目录
+        arrow_file = os.path.join(os.getcwd(), "../", "session_output", "generate-mermaid-diagrams", "_dataset", "data-00000-of-00001.arrow")
+        output_dir = os.path.join("./extracted_data/")
+
         if not os.path.exists(arrow_file):
             print(f"❌ 错误: 找不到文件 {arrow_file}")
             print("请确保已经运行过 DataDreamer 管道并生成了数据文件")
             return
 
-        data, stats = extract_arrow_dataset(arrow_file)
+        data, stats = extract_arrow_dataset(arrow_file_path = arrow_file, output_dir=output_dir)
 
         print(f"\n📊 解压统计:")
         print(f"- 总样本数: {stats['total_samples']}")
