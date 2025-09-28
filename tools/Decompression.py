@@ -49,11 +49,13 @@ def extract_arrow_dataset(arrow_file_path,output_dir):
                         image = Image.open(io.BytesIO(value))
                         print(f"  - 从字节数据创建 PIL Image")
 
+
                     image_filename = f"image_{i}.png"
                     image_path = output_path / image_filename
                     image.save(image_path)
 
                     extracted_row[f'{column_name}_file'] = image_filename
+
                     print(f"  - 图像已保存: {image_filename}")
 
                 except Exception as e:
