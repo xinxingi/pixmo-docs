@@ -4,10 +4,9 @@
 
 ## 快速开始
 [main.py](main.py) 是数据集生成的入口脚本。可用如下参数控制生成流程：
-
-### 先把 key 设置到[.env](.env)中
-
 > 更多参数及用法请参考 [main.py](main.py) 脚本。
+
+### 先把`OPENAI`或 `Claude` key 设置到 [.env](.env) 中
 
 
 ### 样例
