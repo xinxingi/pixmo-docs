@@ -2,58 +2,47 @@
 
 本仓库用于生成 [PixMo-Docs](https://huggingface.co/datasets/allenai/pixmo-docs)、[CoSyn-400K](https://huggingface.co/datasets/allenai/CoSyn-400K) 和 [CoSyn-point](https://huggingface.co/datasets/allenai/CoSyn-point) 数据集。PixMo-Docs 用于训练 [Molmo](https://arxiv.org/abs/2409.17146) 模型，CoSyn 数据集是扩展版本，采用了改进的生成流程并涵盖更多文档类型。更多细节请参见我们的 [论文](https://arxiv.org/pdf/2502.14846)。
 
-## 安装
-克隆仓库后，可使用以下命令安装所需依赖：
-
-```bash
-conda create --name pixmo-doc python=3.10
-conda activate pixmo-doc
-pip install -r requirements.txt
-```
-
-然后将你的 API key 以环境变量形式导出：
-
-```bash
-export OPENAI_API_KEY=your-api-key
-export ANTHROPIC_API_KEY=your-api-key
-export HF_TOKEN=your-api-key # 仅当你需要上传数据集到 Hugging Face Hub 时
-```
-
-部分管道需要安装以下软件包：
-1. LaTeX：安装方式依操作系统而异，可参考 [LaTeX 官网](https://www.latex-project.org/get/)。
-2. Mermaid：可参考 [此处](https://github.com/mermaid-js/mermaid-cli) 使用 npm 安装 Mermaid CLI：
-    ```bash
-    npm install -g @mermaid-js/mermaid-cli
-    ```
-3. HTML：安装 playwright：
-    ```bash
-    pip install playwright
-    playwright install
-    ```
-4. mplfinance：
-   ```
-   pip install mpl_finance<=0.10.1 mplfinance<=0.12.10b0
-   ```
-5. cairosvg：
-   ```
-   pip install cairosvg<=2.7.1
-   ```
-
 ## 快速开始
 [main.py](main.py) 是数据集生成的入口脚本。可用如下参数控制生成流程：
 
-```python
-python main.py -p {管道名称} \
-               -t {要生成的数据类型} \
-               -n {样本数量} \
-               -m {数据集名称} \
-```
+### 先把 key 设置到[.env](.env)中
 
-例如：`python main.py -p "MatplotlibChartPipeline" -n 5 -m "matplotlib_test" -t "bar chart"`，将使用 MatplotlibChartPipeline 生成 5 个条形图并保存为 "matplotlib_test"。
+> 更多参数及用法请参考 [main.py](main.py) 脚本。
 
-`-p` 和 `-t` 参数支持逗号分隔，可同时生成多种类型数据。
 
-更多参数及用法请参考 [main.py](main.py) 脚本。
+### 样例
+* `-p "MermaidDiagramPipeline" -l "gpt-4o" -c "gpt-4o" -n 1 -m "mermaid_diagrams" -t "sequence" -b 1 -q "False" -lang Chinese --force` 
+    * -p: 使用 MermaidDiagramPipeline 管道
+    * -l: 使用 gpt-4o 作为主语言模型
+    * -c: 使用 gpt-4o 作为校对语言模型
+    * -n: 生成 1 个样本
+    * -m: 数据集名称为 "mermaid_diagrams"
+    * -t: 生成时序图
+    * -b: 每次生成 1 个样本
+    * -q: 不生成问答对
+    * -lang: 使用中文
+    * --force: 强制覆盖已存在的数据集
+* `-p "HTMLChartPipeline" -l "gpt-4o" -c "gpt-4o" -n 1 -m "html_charts" -t "bar" -b 1 -q "False" --force`
+    * -p: 使用 HTMLChartPipeline 管道
+    * -l: 使用 gpt-4o 作为主语言模型
+    * -c: 使用 gpt-4o 作为校对语言模型
+    * -n: 生成 1 个样本
+    * -m: 数据集名称为 "html_charts"
+    * -t: 生成条形图
+    * -b: 每次生成 1 个样本
+    * -q: 不生成问答对
+    * --force: 强制覆盖已存在的数据集
+
+### 可能会遇到的异常
+Q: ValueError: Expected {'llm', 'code_llm', 'batch_size', 'code_batch_size', 'n', 'seed', 'figure_types', 'qa'} as args, with {'llm', 'code_llm', 'batch_size', 'code_batch_size', 'n', 'seed', 'figure_types', 'qa'} required, got {'llm', 'code_llm', 'batch_size', 'code_batch_size', 'n', 'seed', 'figure_types', 'qa', 'language'}. See `HTMLChartPipeline.help`:
+
+A: 该异常是由于所使用的管道不支持 `language` 参数。本工程只针对 `MermaidDiagramPipeline` 进行了多语言支持，其他管道均不支持。**解决方式（使用一种方式即可）：**1、请移除`all_pipelines`中`132行`的 `language` 参数。2、参考 `MermaidDiagramPipeline` 的实现自行添加多语言支持。
+
+
+### 如何查看`*.arrow` 文件
+可以使用 [Decompression.py](tools/Decompression.py) 代码来完成解压，指定`arrow_file`和`output_dir`即可。
+
+
 
 ## 管道说明
 我们发布了 25 个管道，可生成八大类富文本图像：图表、表格、文档、图示、电路、专业图形、网页界面和指点类。每个管道使用一种渲染器或编程语言生成图像。

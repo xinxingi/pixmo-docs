@@ -28,6 +28,8 @@ class GenerateDiagramQA(SuperStep):
         self.register_output("image")
         self.register_output("qa")
 
+        self.register_arg("language", required=True, help="The language to use.")
+
     def run(self):
         combined_inputs = DataSource(
             "Combine inputs",
@@ -43,7 +45,7 @@ class GenerateDiagramQA(SuperStep):
         # Create Q&A prompts
         qa_prompts_dataset = combined_inputs.map(
             lambda row: {
-                "prompt": GENERATE_DIAGRAM_QA_PROMPT.format(
+                "prompt": GENERATE_DIAGRAM_QA_PROMPT[self.args['language'].strip()].format(
                     topic=row["topic"], data=row["data"], code=row["code"], persona=json.loads(row["metadata"])["persona"], figure_type=json.loads(row["metadata"])["figure_type"]
                 )
             },

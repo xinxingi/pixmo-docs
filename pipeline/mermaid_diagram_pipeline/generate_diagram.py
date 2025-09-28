@@ -1,12 +1,7 @@
 import os
 import tempfile
-import platform
-import subprocess
 import json
-import random
 import warnings
-import pandas as pd
-from io import StringIO
 import signal
 
 from PIL import Image
@@ -17,7 +12,9 @@ from ..prompts.diagram_prompts import GENERATE_DIAGRAM_CODE_MERMAID_PROMPT
 from ..utils.utils import extract_mermaid, process_image
 from ..utils.render import render_mermaid, crop_whitespace
 
-NUM_RENDER_WORKERS = 4
+# 我就搞不懂咧，别的都是 1 我们咋是 4 呢
+# RuntimeError: One of the subprocesses has abruptly died during map operation.To debug the error, disable multiprocessing.
+NUM_RENDER_WORKERS = 1
 
 
 class TimeoutException(Exception):
@@ -47,6 +44,8 @@ class GenerateDiagram(SuperStep):
         self.register_output("code")
         self.register_output("image")
 
+        self.register_arg("language", required=True, help="The language to use.")
+
     def run(self):
         combined_inputs = DataSource(
             "Combine inputs",
@@ -60,7 +59,7 @@ class GenerateDiagram(SuperStep):
         # Create prompts
         prompts_dataset = combined_inputs.map(
             lambda row: {
-                "prompt": GENERATE_DIAGRAM_CODE_MERMAID_PROMPT.format(
+                "prompt": GENERATE_DIAGRAM_CODE_MERMAID_PROMPT[self.args['language'].strip()].format(
                     topic=row["topic"],
                     figure_type=json.loads(row["metadata"])["figure_type"],
                     data=row["data"],
@@ -100,17 +99,17 @@ class GenerateDiagram(SuperStep):
             os.chdir(tempfile.mkdtemp())
             signal.signal(signal.SIGALRM, timeout_handler)
             signal.alarm(timeout)  # set the timeout
-            
+
             try:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     image = render_mermaid(row["code"])
-                    
+
                     if not isinstance(image, Image.Image):
                         raise TypeError()
 
                     row["image"] = crop_whitespace(process_image(image))
-                    
+
             except TimeoutException:
                 print(f"Error: Code execution exceeded {timeout} seconds.")
                 row["image"] = None
@@ -120,7 +119,7 @@ class GenerateDiagram(SuperStep):
             finally:
                 signal.alarm(0)  # disable the alarm
                 os.chdir(original_dir)
-            
+
             return row
 
         code_and_images = combined.map(
