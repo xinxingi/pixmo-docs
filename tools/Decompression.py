@@ -108,7 +108,7 @@ def extract_arrow_dataset(arrow_file_path,output_dir):
 def main():
     try:
         # 设置 Arrow 文件路径和输出目录
-        arrow_file = os.path.join(os.getcwd(), "../", "session_output", "generate-mermaid-diagrams", "_dataset", "data-00000-of-00001.arrow")
+        arrow_file = os.path.join(os.getcwd(), "../", "session_output/generate-html-charts/_dataset/data-00000-of-00001.arrow")
         output_dir = os.path.join("./extracted_data/")
 
         if not os.path.exists(arrow_file):
