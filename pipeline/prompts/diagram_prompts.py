@@ -341,6 +341,7 @@ Please don't answer with any additional text in the script. Your whole response 
 - 禁止使用样式语法(style, classDef等)
 - 禁止添加图标或外部图像
 - 只使用Mermaid内置功能
+- 禁止出现节点内容出现\\n换行符，要真正换行请使用Mermaid的多行文本语法
 
 质量保证：
 - 语法完全正确，可直接执行
