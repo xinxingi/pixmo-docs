@@ -7,6 +7,17 @@ from pipeline.utils.gpt4o_support import datadreamer_gpt4o_support
 from dotenv import load_dotenv
 load_dotenv()
 
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise ValueError('Boolean value expected.')
+
 def main(args):
     with datadreamer_gpt4o_support():
         run_datadreamer_session(args)
@@ -101,9 +112,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-q",
         "--qa",
-        type=str,
-        default="true",  # 或 "false"
-        help="whether to generate QA for the visualizations (true/false).",
+        type=str2bool,
+        default=True,
+        help="whether to generate QA for the visualizations.",
     )
 
     parser.add_argument(

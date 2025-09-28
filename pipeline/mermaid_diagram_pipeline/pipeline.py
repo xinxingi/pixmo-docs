@@ -5,6 +5,8 @@ from .generate_diagram_data import GenerateDiagramData
 from .generate_diagram import GenerateDiagram
 from .generate_qa import GenerateDiagramQA
 
+import os
+
 class MermaidDiagramPipeline(SuperStep):
     def setup(self):
         self.register_arg("llm", required=True, help="The LLM to use.")
@@ -26,7 +28,8 @@ class MermaidDiagramPipeline(SuperStep):
         self.register_output("data")
         self.register_output("code")
         self.register_output("image")
-        self.register_output("qa")
+
+        if os.environ["GENERATE_QA"] == "true": self.register_output("qa")
 
     def run(self):
         # Generate Topics
@@ -72,32 +75,28 @@ class MermaidDiagramPipeline(SuperStep):
             },
         )
 
-        # 统一布尔转换
-        qa_raw = self.args["qa"]
-        if isinstance(qa_raw, bool):
-            qa_enabled = qa_raw
-        else:
-            qa_enabled = str(qa_raw).strip().lower() in ("1", "true", "yes", "y", "t")
-
-        if not qa_enabled:
+        if not self.args["qa"]:
             return generated_diagrams.output
+        else:
+            # Generate Q&A
+            generated_qa = GenerateDiagramQA(
+                "Generate Q&A",
+                inputs={
+                    "metadata": generated_diagrams.output["metadata"],
+                    "topic": generated_diagrams.output["topic"],
+                    "data": generated_diagrams.output["data"],
+                    "code": generated_diagrams.output["code"],
+                    "image": generated_diagrams.output["image"],
+                },
+                args={
+                    "llm": self.args["llm"],
+                    "batch_size": self.args["batch_size"],
+                    "language": self.args["language"],
+                },
+            )
 
-        generated_qa = GenerateDiagramQA(
-            "Generate Q&A",
-            inputs={
-                "metadata": generated_diagrams.output["metadata"],
-                "topic": generated_diagrams.output["topic"],
-                "data": generated_diagrams.output["data"],
-                "code": generated_diagrams.output["code"],
-                "image": generated_diagrams.output["image"],
-            },
-            args={
-                "llm": self.args["llm"],
-                "batch_size": self.args["batch_size"],
-                "language": self.args["language"],
-            },
-        )
-        return generated_qa.output
+            # Return result
+            return generated_qa.output
 
     @property
     def version(self):
