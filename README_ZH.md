@@ -36,7 +36,7 @@
 ### 可能会遇到的异常
 Q: ValueError: Expected {'llm', 'code_llm', 'batch_size', 'code_batch_size', 'n', 'seed', 'figure_types', 'qa'} as args, with {'llm', 'code_llm', 'batch_size', 'code_batch_size', 'n', 'seed', 'figure_types', 'qa'} required, got {'llm', 'code_llm', 'batch_size', 'code_batch_size', 'n', 'seed', 'figure_types', 'qa', 'language'}. See `HTMLChartPipeline.help`:
 
-A: 该异常是由于所使用的管道不支持 `language` 参数。本工程只针对 `MermaidDiagramPipeline` 进行了多语言支持，其他管道均不支持。**解决方式（使用一种方式即可）：**1、请移除`all_pipelines`中`132行`的 `language` 参数。2、参考 `MermaidDiagramPipeline` 的实现自行添加多语言支持。
+A: 该异常是由于所使用的管道不支持 `language` 参数。本工程只针对 `MermaidDiagramPipeline` 进行了多语言支持，其他管道均不支持。**解决方式（使用一种方式即可）：** 1、请移除`all_pipelines`中`132行`的 `language` 参数。2、参考 `MermaidDiagramPipeline` 的实现自行添加多语言支持。
 
 
 ### 如何查看`*.arrow` 文件
